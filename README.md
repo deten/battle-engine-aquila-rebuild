@@ -6,6 +6,8 @@ A rebuild of the PC game *Battle Engine Aquila* (Lost Toys, 2003) that runs insi
 
 **This repository contains no game files.** You need your own copy of the game (the Windows `BEA.exe`, SHA-256 starting `74154bfae14d`).
 
+> **Disclaimer:** this is an unofficial fan project. It is not affiliated with or endorsed by Lost Toys, the game's publishers or the current rights holders. *Battle Engine Aquila* and related names are trademarks of their respective owners and are used here only to say which game this works with.
+
 ## Where this came from
 
 All of this work was done from the game's machine code alone, with Ghidra and a lot of testing, before I knew that the game's source code had been released. It is a snapshot from 2026-11-05. Function names are therefore Ghidra-style (`FUN_00447120`, `CDropship::vslot66`) and not the developers' real names.
