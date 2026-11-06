@@ -1,0 +1,63 @@
+# Into level 2.21 from the saved game, then the pause menu
+exclusive        # the debriefing may lead to the save screen
+wait 250
+click 320 415
+wait 300
+click 218 343   # Load Game
+wait 150
+click 170 145   # the save
+wait 60
+click 615 455   # forward: level select
+wait 200
+click 615 455   # forward: briefing
+wait 200
+click 615 455   # forward: the level loads
+wait 500
+key esc         # pause
+wait 60
+shot
+click 320 203   # Message Log
+wait 60
+shot
+key esc
+wait 60
+click 320 223   # Briefing
+wait 60
+shot
+key esc
+wait 60
+click 320 243   # Controller Options
+wait 60
+shot
+key esc
+wait 60
+click 320 263   # Sound Options
+wait 60
+shot
+key esc
+wait 60
+click 320 283   # Video Options
+wait 60
+shot
+key esc
+wait 60
+shot
+move 320 323
+wait 30
+click 320 323   # Quit
+wait 100
+shot
+move 320 343
+wait 30
+click 320 343   # Yes
+wait 200
+shot
+wait 300
+shot
+wait 300
+shot
+click 615 455   # forward from the debriefing
+wait 200
+shot
+wait 200
+shot

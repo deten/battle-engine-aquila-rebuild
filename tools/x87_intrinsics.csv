@@ -1,0 +1,9 @@
+address,name,nargs
+# VC6 CRT intrinsics taking their operands on the FPU stack (tools/ghidra/SetX87Intrinsics.java).
+# ST0 is the first operand, ST1 the second; the result is float10 in ST0.  Identified 2026-10-21:
+# 0x55e3ea: `mov edx, 0x653330; jmp __cintrindisp2` with "fmod" at 0x653330
+# 0x55dcb0: fstl, exponent test, then fld1; fadd st(1); fld1; fsub st(2); fmulp; fsqrt; fpatan = atan(x / sqrt(1-x^2))
+0055e3ea,_CIfmod,2
+0055dcb0,_CIasin,1
+# 0x55fa40: CRT _CIpow (base in ST1, exponent in ST0, result ST0), confirmed from the asm 2026-10-29 (scratchpad sigs16.md)
+0055fa40,_CIpow,2

@@ -1,0 +1,11 @@
+# Dodge as I did it at play frame 10436: D tapped 3 frames, A down 6 frames later
+level 300
+wait 119
+shot
+hold d 3
+wait 6
+hold a 6
+wait 6
+shot
+wait 24
+shot

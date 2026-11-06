@@ -1,0 +1,14 @@
+# Graphics profile 7: nVidia NVIDIA GeForce FX 5800 (10de:0302, driver newest): the cardid.txt settings it applies
+#   Tweak:CLAIM_WRITEONLY=1, Tweak:DXSHADOWS_INVERSE=1, Tweak:GEFORCE_FX_POWER=1
+#   Tweak:SUN_METHOD=0, Tweak:TWIMTBP=1
+level 300
+card 10de:0302:7fffffff00000000
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

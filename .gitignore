@@ -1,0 +1,19 @@
+# a second copy of the game for side-by-side test runs
+game2/
+# Game install (copyrighted assets, ~700 MB) stays out of the repo
+Battle Engine Aquila/
+# Ghidra project files
+*.gpr
+*.rep/
+# Build output
+build/
+build_pool/
+build_pool2/
+*.o
+*.obj
+# per-function decompile dumps duplicate decompiled.c (7k files); regenerate with ExportAll.java
+ghidra_out/per_function/
+build/
+build_pool/
+
+tools/__pycache__/

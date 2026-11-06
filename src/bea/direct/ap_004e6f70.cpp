@@ -1,0 +1,58 @@
+// auto-ported from 004e6f70_FUN_004e6f70.c (FUN_004e6f70, 123 bytes) by tools/autoport.py
+// @autoport-mode direct (not shadow-testable: verified by static checks and soak)
+// @autoport-eax unused (2 direct caller(s) overwrite EAX before reading it)
+#include "bea/ghidra_compat.h"
+#include "bea/hooks.h"
+#define BEA_LOOP_GUARD(c) (c)
+
+typedef char BEA_THISCALL;
+#define DAT_009c3df0 GLOBAL_AT(int, 0x009c3df0)
+typedef uint32_t (BEA_THISCALL* FUN_0044b1d0_t)(uint32_t);
+static const bea_guard<FUN_0044b1d0_t> FUN_0044b1d0 = {(FUN_0044b1d0_t)0x0044b1d0};
+typedef uint32_t (BEA_THISCALL* FUN_004e5bd0_t)(uint32_t, uint32_t);
+static const bea_guard<FUN_004e5bd0_t> FUN_004e5bd0 = {(FUN_004e5bd0_t)0x004e5bd0};
+typedef uint32_t (BEA_THISCALL* FUN_004fe500_t)(uint32_t, uint32_t);
+static const bea_guard<FUN_004fe500_t> FUN_004fe500 = {(FUN_004fe500_t)0x004fe500};
+typedef uint32_t (BEA_THISCALL* FUN_00549220_t)(uint32_t, uint32_t);
+static const bea_guard<FUN_00549220_t> FUN_00549220 = {(FUN_00549220_t)0x00549220};
+
+static void BEA_THISCALL ap_004e6f70(void * this_, void *param_1)
+{
+  undefined4 *puVar1;
+  int *this_00;
+  
+  if ((param_1 != (void *)0x0) && (*(void **)((int)param_1 + 0x148) == this_)) {
+    puVar1 = *(undefined4 **)((int)this_ + 0xa4);
+    if (puVar1 == (undefined4 *)0x0) {
+      this_00 = (int *)0x0;
+    }
+    else {
+      this_00 = (int *)*puVar1;
+    }
+    if (this_00 != (int *)0x0) {
+      while (BEA_LOOP_GUARD(((void *)*this_00 != param_1))) {
+        puVar1 = (undefined4 *)puVar1[1];
+        if (puVar1 == (undefined4 *)0x0) {
+          this_00 = (int *)0x0;
+        }
+        else {
+          this_00 = (int *)*puVar1;
+        }
+        if (this_00 == (int *)0x0) {
+          return;
+        }
+      }
+      FUN_004e5bd0(bea_arg((void *)((int)this_ + 0xa4)), bea_arg(this_00));
+      if (this_00 != (int *)0x0) {
+        FUN_0044b1d0(bea_arg(this_00));
+        FUN_00549220(bea_arg(&DAT_009c3df0), bea_arg(this_00));
+      }
+      FUN_004fe500(bea_arg(param_1), bea_arg(0));
+      *(int *)((int)this_ + 0xb4) = *(int *)((int)this_ + 0xb4) + -1;
+    }
+  }
+  return;
+}
+
+// @autoport-registration
+BEA_HOOKS(BEA_HOOK(0x004e6f70, ap_004e6f70));

@@ -1,0 +1,103 @@
+# Video Options: each option changed by hand, Apply, then level 2.21 played with them
+# (anti-aliasing has its own tour: the original is not pixel-repeatable with it)
+exclusive   # writes the options file, which a second instance would read at its start
+wait 250
+click 320 415   # click to start
+wait 300
+click 218 403   # Options
+wait 150
+click 320 293   # Video Options
+wait 150
+click 320 213   # Shadow detail: Low
+wait 40
+key up
+wait 6
+key up
+wait 6
+key up
+wait 6
+key enter
+wait 40
+click 320 233   # Geometry detail: Low
+wait 40
+key up
+wait 6
+key up
+wait 6
+key up
+wait 6
+key enter
+wait 40
+click 320 253   # Trilinear mipmapping: No
+wait 40
+key up
+wait 6
+key up
+wait 6
+key enter
+wait 40
+click 320 293   # VSync: No
+wait 40
+key up
+wait 6
+key up
+wait 6
+key enter
+wait 40
+click 320 313   # Landscape resolution: lowest
+wait 40
+key up
+wait 6
+key up
+wait 6
+key up
+wait 6
+key up
+wait 6
+key enter
+wait 40
+click 320 333   # Texture resolution: lowest (High is first)
+wait 40
+key down
+wait 6
+key down
+wait 6
+key down
+wait 6
+key down
+wait 6
+key enter
+wait 40
+click 320 353   # 32 bit textures: first entry
+wait 40
+key up
+wait 6
+key up
+wait 6
+key up
+wait 6
+key enter
+wait 40
+shot
+click 320 393   # Apply
+wait 150
+shot
+click 20 455    # back
+wait 150
+click 20 455    # back
+wait 150
+click 218 343   # Load Game
+wait 150
+click 170 145   # the save
+wait 60
+click 615 455   # forward: level select
+wait 200
+click 205 350   # 2.21
+wait 60
+click 615 455   # forward: briefing
+wait 200
+click 615 455   # forward: the level loads
+wait 400
+shot
+wait 300
+shot

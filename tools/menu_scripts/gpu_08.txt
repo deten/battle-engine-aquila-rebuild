@@ -1,0 +1,14 @@
+# Graphics profile 8: Matrox Millennium1 (102b:0519, driver newest): the cardid.txt settings it applies
+#   Opt:OPT_FOGGING=1 -1, Opt:OPT_MIPMAP_QUALITY=1 -1, Tweak:IMPOSTOR_ENABLE=0
+#   Tweak:RENDERSTATE_DISALLOW_MIPMAPPING=2, Tweak:SRT_ENABLE=0
+level 300
+card 102b:0519:7fffffff00000000
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

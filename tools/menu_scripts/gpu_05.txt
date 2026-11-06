@@ -1,0 +1,14 @@
+# Graphics profile 5: ATI Radeon8500 (1002:514f, driver 0005000008870c1d): the cardid.txt settings it applies
+#   Tweak:IMPOSTOR_ENABLE=1, Tweak:NOSCROLL_BACKGROUND=1, Tweak:RENDERSTATE_TWEAK_CARD_CANT_DO_TFACTOR=0
+#   Tweak:RENDERSTATE_TWEAK_CARD_CANT_DO_TFACTOR=1, Tweak:SNOW_ENABLE=0, Tweak:SRT_ENABLE=1
+level 300
+card 1002:514f:0005000008870c1d
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

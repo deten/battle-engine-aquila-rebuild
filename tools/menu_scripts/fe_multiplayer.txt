@@ -1,0 +1,134 @@
+# Every unlocked multiplayer game (three modes, three maps each): configuration, 10 s of play,
+# quit from the pause menu back to the multiplayer screen
+wait 250
+click 320 415
+wait 300
+click 218 363   # Multiplayer
+wait 150
+click 148 258   # mode 0 map 0
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+click 228 258   # mode 0 map 1
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+click 305 258   # mode 0 map 2
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+click 148 318   # mode 1 map 0
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+click 228 318   # mode 1 map 1
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+click 305 318   # mode 1 map 2
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+click 148 378   # mode 2 map 0
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+click 228 378   # mode 2 map 1
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+click 305 378   # mode 2 map 2
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+shot

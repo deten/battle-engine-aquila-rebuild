@@ -1,0 +1,20 @@
+// auto-ported from 0049ec80_vslot8.c (CMCTentacle::vslot8, 25 bytes) by tools/autoport.py
+// @autoport-mode direct (not shadow-testable: verified by static checks and soak)
+// @autoport-eax ok
+#include "bea/ghidra_compat.h"
+#include "bea/hooks.h"
+#define BEA_LOOP_GUARD(c) (c)
+
+typedef char CMCTentacle;
+#define DAT_00672fd0 GLOBAL_AT(float, 0x00672fd0)
+
+static undefined4 BEA_THISCALL ap_0049ec80(CMCTentacle * this_)
+{
+  if (DAT_00672fd0 != *(float *)(this_ + 0x28)) {
+    return 1;
+  }
+  return 0;
+}
+
+// @autoport-registration
+BEA_HOOKS(BEA_HOOK(0x0049ec80, ap_0049ec80));

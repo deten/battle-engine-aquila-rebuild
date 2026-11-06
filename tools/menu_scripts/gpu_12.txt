@@ -1,0 +1,13 @@
+# Graphics profile 12: SiS SiS 630/730 (1039:6300, driver newest): the cardid.txt settings it applies
+#   Tweak:VARIABLE_VALIDATEDEVICE=1
+level 300
+card 1039:6300:7fffffff00000000
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

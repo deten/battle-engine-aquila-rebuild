@@ -1,0 +1,15 @@
+# Graphics profile 6: ATI Rage_Pro_Mobility (1002:4c52, driver newest): the cardid.txt settings it applies
+#   Opt:OPT_MIPMAP_QUALITY=1 -1, Tweak:IMPOSTOR_ENABLE=0, Tweak:RENDERSTATE_DISALLOW_MIPMAPPING=1
+#   Tweak:RENDERSTATE_DISALLOW_MULTITEXTURE=100, Tweak:RENDERSTATE_TWEAK_CARD_CANT_DO_MODULATEALPHA=1, Tweak:RENDERSTATE_TWEAK_RAGEPRO_DIRT=1
+#   Tweak:SRT_ENABLE=0
+level 300
+card 1002:4c52:7fffffff00000000
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

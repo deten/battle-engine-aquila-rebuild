@@ -1,0 +1,4 @@
+LIBRARY zlib.dll
+EXPORTS
+    compress   @9
+    uncompress @63

@@ -1,0 +1,14 @@
+# Graphics profile 11: PowerVR KYRO (104a:0010, driver 0004000c00010c11): the cardid.txt settings it applies
+#   Tweak:FASTER_INTERFACE=1, Tweak:IMPOSTOR_ENABLE=0, Tweak:SRT_ENABLE=0
+#   Tweak:SURF_METHOD=0
+level 300
+card 104a:0010:0004000c00010c11
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

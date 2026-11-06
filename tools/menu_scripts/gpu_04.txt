@@ -1,0 +1,14 @@
+# Graphics profile 4: ATI Radeon9700 (1002:4e64, driver newest): the cardid.txt settings it applies
+#   Tweak:GEFORCE_FX_POWER=1, Tweak:GEFORCE_PARTICLE_FOG=0, Tweak:LANDSCAPE_LIGHTING=0
+#   Tweak:MY_READABLE_Z_BUFFER=1, Tweak:SUN_METHOD=0
+level 300
+card 1002:4e64:7fffffff00000000
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

@@ -1,0 +1,40 @@
+# Options and its four screens
+wait 250
+click 320 415
+wait 300
+click 218 403   # Options
+wait 150
+shot
+click 320 253   # Controller Options
+wait 150
+shot
+click 445 113   # mouse sensitivity: up
+wait 30
+click 350 113   # and down
+wait 30
+shot
+click 320 133   # configuration: next
+wait 60
+shot
+click 20 455
+wait 150
+click 320 273   # Sound Options
+wait 150
+shot
+click 20 455
+wait 150
+click 320 293   # Video Options
+wait 150
+shot
+move 260 213    # hover Shadow detail
+wait 30
+shot
+click 20 455
+wait 150
+click 320 313   # Credits
+wait 150
+shot
+wait 300
+shot
+wait 600
+shot

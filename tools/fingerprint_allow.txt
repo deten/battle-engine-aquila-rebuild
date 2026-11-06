@@ -1,0 +1,23 @@
+# address  reason  (ports whose tools/fingerprint.py hard difference was reviewed and is not a bug)
+00506010 calls-509e90: GCC proves the call dead (the loop stores iVar3 to this+0xa0 and then tests both); the original keeps the code
+00447d50 consts-25: `(float)uStack_10 + 25.0f != 0.0f` compiled as the integer compare uStack_10 != -25 (exact for integers)
+00425a10 calls-4fd3d0: the original itself tests `(flags & 0x20000) == 1`, which is never true (VC6 compiled `== true`); the call is dead in both
+00517c60 fild 3>2: integer constants 22050/44100/88200 converted to float at compile time, exact
+0040c750 consts-0.2,0.4: `fVar1 = 0.2f; if (..) fVar1 = 0.4f; if (fVar1 * fVar1 < fVar2)` folded by GCC into the squares 0.04f/0.16f (differs from the x87 product in the last bit at most)
+0047a2a0 consts-3: `if (dist <= limit + 3.0f)` with limit 15.0f or 25.0f (fadd 3.0 at 0x47a315) folded by GCC into the constants 18/28 (exact)
+004e1b20 fild 8>3: GCC copies the one `(float)iVar11` fild of 0x4e2187 into the six paths of the 10000/-10000 clamp x this_00[5] branch (all read the same fistp slot); 0x4e1e17 fidiv and 0x4e1fe7 fild are the other two
+00485d50 fsin 2!=1 fistp 2!=1: GCC duplicates the one `ROUND((fsin(DAT_00672fd0 * 4) + 1) * -64)` (fsin/fistp at 0x485f3e) into the two paths after the 0x40c590 switch
+0051ae70 consts-4,5.5,7,10,11,132: the original adds up .rdata layout constants at run time (24*11+130+7 = 401 at 0x51ae73, 132-4 = 128 at 0x51af45, 24*5.5+130 = 262 at 0x51b216, 401-130-10 = 261 at 0x51b298) that Ghidra folded into the exact results 401/128/262/261/271
+004505b0 consts-1500,5000,1.04e+06,5.225e+07: inlined normalise of the constant vectors (-5000,5000,1500) and (0,1000,200) (fld sqrt(52250000)/sqrt(1040000), fdivr 1.0, fmul at 0x450929 and 0x450a37) folded by Ghidra into the results 0xbf311433/0x3f311433/0x3e547ea3 and 0x3f7b0756/0x3e48d2ab, bit-exact at the 24-bit precision D3D sets
+0051e1b0 consts-310,1500,5000,1.04e+06,5.225e+07: same inlined light-vector normalise as 0x4505b0 (0x51e6d6, 0x51e7e7), folded bit-exact at 24-bit precision; `(sel ? -182 : 115) + 310` (fadd 310 at 0x51f041/0x51f245) folded by GCC into 128/425 (exact)
+00522190 consts-1500,5000,1.04e+06,5.225e+07: same inlined light-vector normalise as 0x4505b0 (0x5224fa, 0x522608), folded by Ghidra into the results, bit-exact at 24-bit precision
+00416970 consts-0.523599,0.785398: GCC selects +-pi/6 with mov/cmovae from .rdata and stores +-pi/4 as immediates (integer moves, not x87 loads); same bits as the original's fld/fstp
+004e1360 consts-0.1: the field was zeroed just before (ebp == 0 since 0x4e13b9), so 0 -+ 0.1f folds to the stored constant -+0.1f; exact
+0052cd20 consts-0.001,0.1: the port reads 0.001 (double) and 0.1 (double) from the game's .rdata (GLOBAL_AT 0x5d8bc8, 0x5d8c38) as the original does
+0047d750 consts-0.05,0.6,1.5708,3.14159,4,6.28318: every constant is read from the game's .rdata by GLOBAL_AT at the original addresses (hand rewrite from the asm)
+00546b40 consts-0.03: 0.03 is read from the game's .rdata by GLOBAL_AT 0x5e50c8 (hand rewrite from the asm)
+00509c80 consts-0.025: read from the game's .rdata by GLOBAL_AT 0x5d8c6c as the asm does (hand port 2026-10-29)
+0042c810 consts-20: the _CIfmod operand 20.0 is read from the game's .rdata (DAT_005d9770) and loaded by bea_x87call2 (hand port 2026-10-29)
+00467200 consts: constants read from the game's .rdata by GLOBAL_AT, drawing in static helpers the fingerprint does not follow (hand port 2026-10-29)
+004dcba0 consts-10,100,255: read from the game's .rdata by GLOBAL_AT (hand port 2026-10-29)
+00465710 calls-55def0 consts: 0x55def0 is __chkstk (the original's 0x2710-byte frame; GCC probes with its own); constants via GLOBAL_AT (hand port 2026-10-29)

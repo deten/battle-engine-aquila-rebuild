@@ -1,0 +1,13 @@
+# Graphics profile 9: SiS Xabre 600 (1039:0330, driver newest): the cardid.txt settings it applies
+#   Tweak:DISABLE_SNOW=1, Tweak:FORCE_VSYNC=1, Tweak:ZBIAS_SCALER=0.00014
+level 300
+card 1039:0330:7fffffff00000000
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

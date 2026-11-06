@@ -1,0 +1,14 @@
+# test runs write their logs and shots here; only the data below is tracked
+*
+!.gitignore
+!README.md
+!*.json
+!recordings/
+!recordings/*.rec
+!recordings/*.log
+!recordings/*.options
+!recordings/*.bea
+!user_profile/
+!user_profile/defaultoptions.bea
+!user_profile/savegames_backup/
+!user_profile/savegames_backup/*

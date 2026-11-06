@@ -1,0 +1,15 @@
+# Graphics profile 10: S3 Savage2000 (5333:9102, driver newest): the cardid.txt settings it applies
+#   Opt:OPT_MIPMAP_QUALITY=1 -1, Tweak:BATTLELINE_METHOD=0, Tweak:IMPOSTOR_ENABLE=0
+#   Tweak:LANDSCAPE_METHOD=0, Tweak:RENDERSTATE_DISALLOW_MIPMAPPING=1, Tweak:RENDERSTATE_DISALLOW_MULTITEXTURE=100
+#   Tweak:RENDERSTATE_TWEAK_CARD_CAN_DO_ADD_ALPHA_BUT_CLAIMS_IT_CANT=1, Tweak:SRT_ENABLE=0
+level 300
+card 5333:9102:7fffffff00000000
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

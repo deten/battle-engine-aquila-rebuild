@@ -1,0 +1,28 @@
+# Load the saved game, level select, briefing, into the level
+wait 250
+click 320 415
+wait 300
+click 218 343   # Load Game
+wait 150
+shot
+click 170 145   # the save
+wait 60
+shot
+click 615 455   # forward
+wait 200
+shot
+click 145 290   # another level node
+wait 60
+shot
+click 205 350   # back to 2.21
+wait 60
+click 615 455   # forward: briefing
+wait 200
+shot
+wait 200
+shot
+click 615 455   # forward: the level loads
+wait 200
+shot
+wait 300
+shot

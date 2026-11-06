@@ -1,0 +1,28 @@
+// auto-ported from 00430610_vslot0.c (CSpawnerData::vslot0, 76 bytes) by tools/autoport.py
+// @autoport-mode direct (not shadow-testable: verified by static checks and soak)
+// @autoport-eax ok
+#include "bea/ghidra_compat.h"
+#include "bea/hooks.h"
+#define BEA_LOOP_GUARD(c) (c)
+
+typedef char BEA_THISCALL;
+typedef char CSpawnerData;
+#define DAT_009c3df0 GLOBAL_AT(int, 0x009c3df0)
+typedef undefined4 (BEA_THISCALL* FUN_00549220_t)(uint32_t, uint32_t);
+static const bea_guard<FUN_00549220_t> FUN_00549220 = {(FUN_00549220_t)0x00549220};
+
+static CSpawnerData * BEA_THISCALL ap_00430610(CSpawnerData * this_, uint param_1)
+{
+  *(undefined ***)this_ = ((void*)0x005d98c0);
+  FUN_00549220(bea_arg(&DAT_009c3df0), bea_arg(*(undefined4 *)(this_ + 4)));
+  *(undefined4 *)(this_ + 4) = 0;
+  FUN_00549220(bea_arg(&DAT_009c3df0), bea_arg(*(undefined4 *)(this_ + 8)));
+  *(undefined4 *)(this_ + 8) = 0;
+  if ((param_1 & 1) != 0) {
+    FUN_00549220(bea_arg(&DAT_009c3df0), bea_arg(this_));
+  }
+  return this_;
+}
+
+// @autoport-registration
+BEA_HOOKS(BEA_HOOK(0x00430610, ap_00430610));

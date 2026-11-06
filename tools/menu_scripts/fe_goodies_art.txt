@@ -1,0 +1,76 @@
+# The goodie art pages: every goodie unlocked, the first eight (character art) opened and closed
+# Each page fades its caption in on real time, not the game clock: two runs of the
+# original differ by up to ~1100 pixels at the same frame (2026-11-04)
+tolerance 3000
+goodies 3
+wait 250
+click 320 415
+wait 300
+click 218 383   # Goodies
+wait 150
+shot
+click 148 255   # goodie 0
+wait 30
+shot
+click 615 455   # open
+wait 200
+shot
+key esc
+wait 100
+click 193 255   # goodie 1
+wait 30
+shot
+click 615 455   # open
+wait 200
+shot
+key esc
+wait 100
+click 238 255   # goodie 2
+wait 30
+shot
+click 615 455   # open
+wait 200
+shot
+key esc
+wait 100
+click 283 255   # goodie 3
+wait 30
+shot
+click 615 455   # open
+wait 200
+shot
+key esc
+wait 100
+click 328 255   # goodie 4
+wait 30
+shot
+click 615 455   # open
+wait 200
+shot
+key esc
+wait 100
+click 373 255   # goodie 5
+wait 30
+shot
+click 615 455   # open
+wait 200
+shot
+key esc
+wait 100
+click 418 255   # goodie 6
+wait 30
+shot
+click 615 455   # open
+wait 200
+shot
+key esc
+wait 100
+click 463 255   # goodie 7
+wait 30
+shot
+click 615 455   # open
+wait 200
+shot
+key esc
+wait 100
+shot

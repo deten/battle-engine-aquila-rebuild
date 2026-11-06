@@ -1,0 +1,35 @@
+// auto-ported from 0054bf80_FUN_0054bf80.c (FUN_0054bf80, 112 bytes) by tools/autoport.py
+// @autoport-mode direct (not shadow-testable: verified by static checks and soak)
+// @autoport-ehframe: VC6 exception-frame setup removed (NOTES A1-11)
+// @autoport-eax ok
+#include "bea/ghidra_compat.h"
+#include "bea/hooks.h"
+#define BEA_LOOP_GUARD(c) (c)
+
+typedef char BEA_STDCALL;
+typedef uint32_t (BEA_STDCALL* FUN_00512ca0_t)(uint32_t);
+static const bea_guard<FUN_00512ca0_t> FUN_00512ca0 = {(FUN_00512ca0_t)0x00512ca0};
+
+static void * BEA_THISCALL ap_0054bf80(void * this_)
+{
+  int iVar1;
+  undefined4 *puVar2;
+  undefined1 *puStack_8;
+  undefined4 local_4;
+  *(undefined ***)this_ = ((void*)0x005e50fc);
+  *(undefined4 *)((int)this_ + 0x10c) = 0;
+  *(undefined4 *)((int)this_ + 0x108) = 0;
+  *(undefined4 *)((int)this_ + 0x110) = 0;
+  *(undefined4 *)((int)this_ + 0x120) = 0;
+  *(undefined4 *)((int)this_ + 0x124) = 0;
+  puVar2 = (undefined4 *)((int)this_ + 8);
+  for (iVar1 = 0x40; BEA_LOOP_GUARD((iVar1 != 0)); iVar1 = iVar1 + -1) {
+    *puVar2 = 0;
+    puVar2 = puVar2 + 1;
+  }
+  FUN_00512ca0(bea_arg(this_));
+  return this_;
+}
+
+// @autoport-registration
+BEA_HOOKS(BEA_HOOK(0x0054bf80, ap_0054bf80));

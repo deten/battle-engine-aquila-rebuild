@@ -1,0 +1,10 @@
+# Dodge: A down, then D down 9 frames (0.15 s) later: dashes right
+level 300
+wait 119
+shot
+hold a 9
+hold d 6
+wait 6
+shot
+wait 24
+shot

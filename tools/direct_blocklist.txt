@@ -1,0 +1,185 @@
+# address  reason (ports quarantined by tools/direct_batch.py; files kept in tools/direct_quarantine/)
+004d65a0 soak level 400 (crash log)
+004883f0 soak level 511
+005001e0 soak level 511
+005514a0 soak level 100
+0040f2f0 soak level 200
+004c5c50 soak level 200
+0053aa40 soak level 200
+004fd040 soak level 200
+00426150 soak level 200
+004f9260 soak level 200
+0048ace0 soak level 200
+004ba7f0 soak level 400 (crash log)
+00443890 soak level 200
+00445f40 soak level 400
+004a1270 soak level 400
+00406050 soak level 200
+004e8060 soak level 200
+004e80b0 soak level 511
+004dfaa0 soak level 200
+004ea780 soak level 200
+0053be40 soak level 200
+004fb840 soak level 200
+0048b8e0 soak level 200
+0048ea80 soak level 100
+0050b030 soak level 100
+0053c510 soak level 100
+0047eff0 soak level 100
+0048ef00 soak level 100
+00446150 level 200 intermittent hang with its partner (0x446150+0x448930 together: NaN angle spins 0x427210's wrap loop at 0x4279b2; flaky_bisect 2026-10-19)
+0046b950 soak level frontend
+00415780 soak level 321
+004d7b10 deep soak level 500 (all-port bisect 2026-10-19)
+00489ef0 deep soak level 500 (all-port bisect 2026-10-19)
+004d1f90 deep soak level 500 (all-port bisect 2026-10-19)
+0049fb00 deep soak level 700 (all-port bisect 2026-10-19)
+004e8930 deep soak level 700 (all-port bisect 2026-10-19)
+004c0450 deep soak level 211 (disable_search 2026-10-19)
+004c0490 deep soak level 211 (disable_search 2026-10-19)
+004439f0 autopilot level 500 (flaky_bisect interaction set)
+004114d0 autopilot level 211 grid hang (flaky_bisect interaction set, 0x40f5xx-0x411bxx cluster)
+00411a60 autopilot level 211 grid hang (flaky_bisect interaction set, 0x40f5xx-0x411bxx cluster)
+00411b70 autopilot level 211 grid hang (flaky_bisect interaction set, 0x40f5xx-0x411bxx cluster)
+004d1fd0 Ghidra misreads a leftover stack argument (vcall pops 8 of 12; 0x4aa630 gets 0, the port passes the string)
+004726b0 calls an ECX-reading callee without ECX (check_ecx.py)
+00456930 check_ecx
+0046d3a0 soak level 700
+004d1110 soak level 700
+00415d90 check_st0 self: ST0 live at ret, port returns undefined4
+004444b0 fingerprint: extraout_ST0 (callee float result read as an uninitialised variable, port stores 0)
+004445b0 fingerprint: extraout_ST0 (callee float result read as an uninitialised variable, port stores 0)
+00444620 fingerprint: extraout_ST0 (callee float result read as an uninitialised variable, port stores 0)
+0052b760 fingerprint: Ghidra lost an out-parameter alias, vcall through NULL; GCC removed the code after it (calls to 0x52c8d0/0x52cd20)
+004f34a0 gated_batch: level 211 none@320.1 (baseline Firebase was destroyed@200.000)
+005282b0 gated_batch: level 100 CRASH (baseline none@320.300)
+004e04c0 check_varargs
+00540c30 fingerprint
+0040c750 gated_batch: level 200 Transports didn't make it to the firebase@136.7 (baseline none@320.050)
+004b5e80 gated_batch: level 211 Firebase was destroyed@196.4 (baseline Firebase was destroyed@200.000)
+00477ba0 gated_batch: level 311 Too many Forseti buildings were destroyed@196.4 (baseline Too many Forseti turrets were destroyed@275.300)
+004cef70 gated_batch: level 110 Battle Engine was destroyed.@262.1 (baseline none@320.100)
+0048de30 gated_batch: level 100 CRASH (baseline none@320.300)
+004fd140 gated_batch: level 110 CRASH (baseline none@320.100)
+00544cc0 gated_batch: level 411 The Marshall was destroyed.@176.8 (baseline The Marshall was destroyed.@179.750)
+004cd7f0 gated_batch: level 100 CRASH (baseline none@320.300)
+004f95d0 gated_batch: level 200 CRASH (baseline none@320.050)
+005096a0 gated_batch: level 400 Battle Engine was destroyed.@105.2 (baseline Battle Engine fell in the sea.@76.000)
+004d2b40 frame: level 100 clock 60 differs from the original (tools/shot_bisect.py)
+004d2a70 frame: level 100 clock 60 differs from the original (tools/shot_bisect.py)
+00540c30 class 19: two temporaries assigned code addresses (stale by-value slots), one unresolved
+00528af0 frame: the live tree differed from the original by 0.72% at level 100 clock 60 (shot_bisect --tol 0.0005)
+004db630 gated_batch: level 411 The Marshall was destroyed.@177.2 (baseline The Marshall was destroyed.@179.750)
+004d1cd0 gated_batch: level 211 Firebase was destroyed@183.4 (baseline Firebase was destroyed@200.000)
+004244b0 gated_batch: level 511 Battle Engine fell in the sea.@67.7 (baseline Battle Engine fell in the sea.@58.950)
+00479200 gated_batch: level 400 Battle Engine was destroyed.@116.3 (baseline Battle Engine fell in the sea.@76.000)
+00411630 gated_batch: level 411 The Marshall was destroyed.@174.8 (baseline The Marshall was destroyed.@179.750)
+0046e240 frame: level 100 clock 60 differs by 3.8% with it on (slipped through round 8 of run 11 while the batch-less frame check was broken)
+0046e460 gated_batch: frame CRASH (baseline same)
+00486940 gated_batch: level 200 CRASH (baseline none@320.050)
+004db150 gated_batch: level 411 The Marshall was destroyed.@176.0 (baseline The Marshall was destroyed.@179.750)
+004e4e00 gated_batch: level 311 Too many Forseti buildings were destroyed@234.4 (baseline Too many Forseti turrets were destroyed@275.300)
+004efb10 gated_batch: level 411 The Marshall was destroyed.@177.2 (baseline The Marshall was destroyed.@179.750)
+004acf30 gated_batch: level 400 Battle Engine was destroyed.@107.9 (baseline Battle Engine fell in the sea.@76.000)
+00478510 gated_batch: level 400 Battle Engine was destroyed.@111.0 (baseline Battle Engine fell in the sea.@76.000)
+005088b0 fingerprint
+004f86d0 gated_batch: level 110 CRASH (baseline none@320.100)
+00545590 gated_batch: frame differs 25.7% (baseline same)
+004c36b0 gated_batch: level 411 The Marshall was destroyed.@176.2 (baseline The Marshall was destroyed.@179.750)
+00507ab0 gated_batch: withdrawn with its batch (levels 411)
+00521260 menu New Game: fatal "File not found: " with an empty name (replay of my session play_20261023_185305.rec; float-param split port)
+004ac6e0 replay 300r (my level-300 playthrough): mesh collision changed the outcome (alone: sea at 183.9; original destroyed at 133.5)
+00410c50 replay 300r (my level-300 playthrough): the outcome moved by 3 s with it (alone: destroyed at 136.6 vs 133.5)
+00472f10 fingerprint
+004cac80 check_st0 self: callers store its float, the port returns nothing (Ghidra lost the x87 body)
+00479630 gated_batch: level 411 The Marshall was destroyed.@164.5 (baseline The Marshall was destroyed.@179.750)
+00446480 gated_batch: level 400 Battle Engine was destroyed.@110.3 (baseline Battle Engine fell in the sea.@76.000)
+004d3110 gated_batch: level 300r The Forseti base was destroyed!@191.0 (baseline Battle Engine was destroyed.@133.450)
+004b81d0 check_ret
+004e9570 check_ret
+004f6430 fingerprint
+00416fc0 check_uninit
+00425b50 check_uninit
+0049bd50 check_frame
+004b6260 check_frame
+00515980 check_table_index
+004c0ab0 check_ret
+00460140 fingerprint
+004f0630 fingerprint
+004ff330 fingerprint
+00541650 fingerprint
+00557060 fingerprint
+00419ec0 check_uninit
+004f3ac0 check_uninit
+00464730 fingerprint
+004d66b0 fingerprint
+00421f90 gated_batch: level 331r Battle Engine fell in the sea.@74.3 (baseline Battle Engine fell in the sea.@166.000)
+00458ee0 fingerprint
+0046c430 fingerprint
+004c1a90 check_uninit
+004d40d0 fingerprint
+004687e0 check_uninit
+004ab360 check_uninit
+004cf430 check_dat_arith
+00550be0 gated_batch: frame differs 99.7% (baseline same)
+005286e0 fingerprint
+004905f0 check_table_index
+00557300 check_dat_arith
+00455010 check_dat_arith
+00544fc0 fingerprint
+00545070 fingerprint
+00554750 fingerprint
+00462d40 check_fild
+0053cd30 gated_batch: frame differs 3.1% (baseline same)
+00460b40 menu tours: Load Game exits with the fatal "File not found" (empty texture name), found by tools/menu_test.py
+00555be0 menu tours: Load Game exits with the fatal "File not found" (empty texture name), found by tools/menu_test.py
+00540010 menu tours: fe_pause frame 1812 differs (text drawing), found by tools/menu_test.py
+00522190 check_uninit
+0051e1b0 check_frame
+0053abe0 check_fp_order
+00485d50 gated_batch: level 110 CRASH (baseline none@320.100)
+00483530 gated_batch: level 211 CRASH (baseline Firebase was destroyed@200.000)
+0047a2a0 gated_batch: level menu1 CRASH (baseline none)
+004505b0 check_uninit
+00407540 gated_batch: level menu1 CRASH (baseline none)
+0051ae70 gated_batch: level menu1 CRASH (baseline none)
+004f9820 check_dat_arith
+00548ec0 check_dat_arith
+004c15f0 check_fild
+004f6560 check_fild
+004254f0 check_fp_order
+004c9000 check_fild
+0050b520 gated_batch: level 110 CRASH (baseline none@320.100)
+004151a0 gated_batch: level 400 Battle Engine was destroyed.@112.5 (baseline Battle Engine fell in the sea.@76.000)
+004264a0 gated_batch: level 523r Battle Engine was destroyed.@88.5 (baseline Battle Engine was destroyed.@166.300)
+004fa8d0 gated_batch: level 300r Battle Engine fell in the sea.@166.0 (baseline Battle Engine was destroyed.@133.450)
+004b5330 gated_batch: level 211 Firebase was destroyed@183.4 (baseline Firebase was destroyed@200.000)
+00546b40 check_dat_arith
+00428cb0 gated_batch: level 523r CRASH (baseline Battle Engine was destroyed.@166.300)
+00422820 gated_batch: level 611r CRASH (baseline Battle Engine fell in the sea.@104.450)
+00422440 gated_batch: level 611r CRASH (baseline Battle Engine fell in the sea.@104.450)
+00447b10 gated_batch: level 110 CRASH (baseline none@320.100)
+00447ac0 gated_batch: level 110 CRASH (baseline none@320.100)
+0041b370 gated_batch: level 110 CRASH (baseline none@320.100)
+004289b0 gated_batch: withdrawn with its batch (levels 110 200 211 221 231 300 300r 311 321 400 411 500 500r 511 523r 600 611r 700 742r)
+00415970 gated_batch: withdrawn with its batch (levels 110 200 211 221 231 300 300r 311 321 400 411 500 500r 511 523r 600 611r 700 742r)
+00418120 gated_batch: withdrawn with its batch (levels 110 200 211 221 231 300 300r 311 321 400 411 500 500r 511 523r 600 611r 700 742r)
+00445250 gated_batch: withdrawn with its batch (levels 110 200 211 221 231 300 300r 311 321 400 411 500 500r 511 523r 600 611r 700 742r)
+004f35d0 gated_batch: withdrawn with its batch (levels 110 200 211 221 231 300 300r 311 321 400 411 500 500r 511 523r 600 611r 700 742r)
+004d2010 gated_batch: withdrawn with its batch (levels 110 200 211 221 231 300 300r 311 321 400 411 500 500r 511 523r 600 611r 700 742r)
+004fbcb0 gated_batch: withdrawn with its batch (levels 110 200 211 221 231 300 300r 311 321 400 411 500 500r 511 523r 600 611r 700 742r)
+004157c0 arity: freed by the reverted early-push rule (5ffbc25); the vcall pops all its pushes and the callee takes an older slot (0x447ac0 crash, 2026-10-29)
+0047bbf0 arity: freed by the reverted early-push rule (5ffbc25); the vcall pops all its pushes and the callee takes an older slot (0x447ac0 crash, 2026-10-29)
+004bbcd0 arity: freed by the reverted early-push rule (5ffbc25); the vcall pops all its pushes and the callee takes an older slot (0x447ac0 crash, 2026-10-29)
+004dea50 arity: freed by the reverted early-push rule (5ffbc25); the vcall pops all its pushes and the callee takes an older slot (0x447ac0 crash, 2026-10-29)
+004ded30 arity: freed by the reverted early-push rule (5ffbc25); the vcall pops all its pushes and the callee takes an older slot (0x447ac0 crash, 2026-10-29)
+004ded60 arity: freed by the reverted early-push rule (5ffbc25); the vcall pops all its pushes and the callee takes an older slot (0x447ac0 crash, 2026-10-29)
+004f2ce0 arity: freed by the reverted early-push rule (5ffbc25); the vcall pops all its pushes and the callee takes an older slot (0x447ac0 crash, 2026-10-29)
+005588f0 fingerprint
+00528540 gated_batch: frame CRASH (baseline same)
+00423030 fingerprint
+004c2d30 fingerprint
+004fa4b0 fingerprint
+00402fa0 sync-mode level 311: ports on 275.3, original 287.9 (bisected 2026-10-29; hand port of 10-29, the difference was hidden by async streaming)
+00428110 sync-mode level 311: ports on 275.3, original 287.9 (second culprit, bisected 2026-10-29)
+004454c0 sync-mode level 311: alone it moves 311 from 287.9 to 275.3 (third vslot66 culprit, 2026-10-29; asm-equivalent on reading - suspect an x87 stack leak the tail jump passes on and bea_guard pops)

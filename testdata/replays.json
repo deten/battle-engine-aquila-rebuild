@@ -1,0 +1,781 @@
+{
+ "300r": {
+  "level": "300",
+  "file": "recordings/level_300.rec"
+ },
+ "menu1": {
+  "level": "menu",
+  "file": "recordings/play_20261023_185305.rec",
+  "secs": 40
+ },
+ "500r": {
+  "level": "500",
+  "file": "recordings/level_500v.rec",
+  "endclock": 420
+ },
+ "523r": {
+  "level": "523",
+  "file": "recordings/level_523.rec",
+  "endclock": 300
+ },
+ "800r": {
+  "level": "800",
+  "file": "recordings/level_800.rec",
+  "endclock": 220
+ },
+ "742r": {
+  "level": "742",
+  "file": "recordings/level_742.rec",
+  "endclock": 320
+ },
+ "331r": {
+  "level": "331",
+  "file": "recordings/level_331.rec",
+  "endclock": 400
+ },
+ "611r": {
+  "level": "611",
+  "file": "recordings/level_611.rec",
+  "endclock": 380
+ },
+ "100p": {
+  "level": "100",
+  "file": "recordings/level_100_play.rec",
+  "client": "1962x1442",
+  "endclock": 420
+ },
+ "521r": {
+  "level": "521",
+  "file": "recordings/level_521.rec",
+  "endclock": 300
+ },
+ "522r": {
+  "level": "522",
+  "file": "recordings/level_522_2.rec",
+  "endclock": 120
+ },
+ "800r2": {
+  "level": "800",
+  "file": "recordings/level_800_2.rec",
+  "endclock": 1000
+ },
+ "731r": {
+  "level": "731",
+  "file": "recordings/level_731.rec",
+  "endclock": 300
+ },
+ "100r": {
+  "level": "100",
+  "file": "recordings/level_100_2.rec",
+  "sync": true,
+  "endclock": "520"
+ },
+ "800c": {
+  "level": "800",
+  "file": "recordings/level_800_4.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "540"
+ },
+ "522c": {
+  "level": "522",
+  "file": "recordings/level_522_9.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "290"
+ },
+ "512r": {
+  "level": "512",
+  "file": "recordings/level_512.rec",
+  "sync": true,
+  "endclock": "280"
+ },
+ "720r": {
+  "level": "720",
+  "file": "recordings/level_720.rec",
+  "sync": true,
+  "endclock": "360"
+ },
+ "710r": {
+  "level": "710",
+  "file": "recordings/level_710_2.rec",
+  "sync": true,
+  "endclock": "350"
+ },
+ "431r": {
+  "level": "431",
+  "file": "recordings/level_431.rec",
+  "sync": true,
+  "endclock": "290"
+ },
+ "741r": {
+  "level": "741",
+  "file": "recordings/level_741_4.rec",
+  "sync": true,
+  "endclock": "240"
+ },
+ "110r": {
+  "level": "110",
+  "file": "recordings/level_110.rec",
+  "sync": true,
+  "endclock": "140"
+ },
+ "200r": {
+  "level": "200",
+  "file": "recordings/level_200.rec",
+  "sync": true,
+  "endclock": "175"
+ },
+ "211r": {
+  "level": "211",
+  "file": "recordings/level_211.rec",
+  "sync": true,
+  "endclock": "360"
+ },
+ "221r": {
+  "level": "221",
+  "file": "recordings/level_221.rec",
+  "sync": true,
+  "endclock": "250"
+ },
+ "_sync211": {
+  "level": "211",
+  "file": "recordings/level_211.rec",
+  "sync": true,
+  "endclock": "40"
+ },
+ "400r": {
+  "level": "400",
+  "file": "recordings/level_400_2.rec",
+  "sync": true,
+  "endclock": "350"
+ },
+ "600r": {
+  "level": "600",
+  "file": "recordings/level_600.rec",
+  "sync": true,
+  "endclock": "287"
+ },
+ "700r": {
+  "level": "700",
+  "file": "recordings/level_700.rec",
+  "sync": true,
+  "endclock": "240"
+ },
+ "311r": {
+  "level": "311",
+  "file": "recordings/level_311.rec",
+  "sync": true,
+  "endclock": "210"
+ },
+ "411r": {
+  "level": "411",
+  "file": "recordings/level_411.rec",
+  "sync": true,
+  "endclock": "433"
+ },
+ "511r": {
+  "level": "511",
+  "file": "recordings/level_511.rec",
+  "sync": true,
+  "endclock": "100"
+ },
+ "621r": {
+  "level": "621",
+  "file": "recordings/level_621.rec",
+  "sync": true,
+  "endclock": "232"
+ },
+ "231r": {
+  "level": "231",
+  "file": "recordings/level_231.rec",
+  "sync": true,
+  "endclock": "290"
+ },
+ "321r": {
+  "level": "321",
+  "file": "recordings/level_321.rec",
+  "sync": true,
+  "endclock": "383"
+ },
+ "421r": {
+  "level": "421",
+  "file": "recordings/level_421.rec",
+  "sync": true,
+  "endclock": "143"
+ },
+ "211w": {
+  "level": "211",
+  "file": "recordings/level_211_2.rec",
+  "sync": true,
+  "endclock": "264"
+ },
+ "700w": {
+  "level": "700",
+  "file": "recordings/level_700_3.rec",
+  "sync": true,
+  "endclock": "580",
+  "cheat": true
+ },
+ "511w": {
+  "level": "511",
+  "file": "recordings/level_511_2.rec",
+  "sync": true,
+  "endclock": "298",
+  "cheat": true
+ },
+ "221w": {
+  "level": "221",
+  "file": "recordings/level_221_3.rec",
+  "sync": true,
+  "endclock": "223",
+  "cheat": true
+ },
+ "300w": {
+  "level": "300",
+  "file": "recordings/level_300_2.rec",
+  "sync": true,
+  "endclock": "143",
+  "cheat": true
+ },
+ "500w": {
+  "level": "500",
+  "file": "recordings/level_500_3.rec",
+  "sync": true,
+  "endclock": "306",
+  "cheat": true
+ },
+ "523w": {
+  "level": "523",
+  "file": "recordings/level_523_2.rec",
+  "sync": true,
+  "endclock": "346",
+  "cheat": true
+ },
+ "331w": {
+  "level": "331",
+  "file": "recordings/level_331_2.rec",
+  "sync": true,
+  "endclock": "222",
+  "cheat": true
+ },
+ "611w": {
+  "level": "611",
+  "file": "recordings/level_611_3.rec",
+  "sync": true,
+  "endclock": "222",
+  "cheat": true
+ },
+ "731w": {
+  "level": "731",
+  "file": "recordings/level_731_2.rec",
+  "sync": true,
+  "endclock": "343",
+  "cheat": true
+ },
+ "742w": {
+  "level": "742",
+  "file": "recordings/level_742_12.rec",
+  "sync": true,
+  "endclock": "64",
+  "cheat": true
+ },
+ "221p": {
+  "level": "221",
+  "file": "recordings/level_221_3.rec",
+  "sync": true,
+  "endclock": "343",
+  "cheat": true,
+  "protect": "Packhorse"
+ },
+ "300p": {
+  "level": "300",
+  "file": "recordings/level_300_2.rec",
+  "sync": true,
+  "endclock": "263",
+  "cheat": true,
+  "protect": "Building&!side1"
+ },
+ "200p": {
+  "level": "200",
+  "file": "recordings/level_200.rec",
+  "sync": true,
+  "endclock": "295",
+  "protect": "Transporter"
+ },
+ "331p": {
+  "level": "331",
+  "file": "recordings/level_331_2.rec",
+  "sync": true,
+  "endclock": "342",
+  "cheat": true,
+  "protect": "Transport"
+ },
+ "421p": {
+  "level": "421",
+  "file": "recordings/level_421.rec",
+  "sync": true,
+  "endclock": "263",
+  "protect": "Packhorse"
+ },
+ "522p": {
+  "level": "522",
+  "file": "recordings/level_522_9.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "410",
+  "protect": "Landing Craft"
+ },
+ "231p": {
+  "level": "231",
+  "file": "recordings/level_231.rec",
+  "sync": true,
+  "endclock": "410",
+  "protect": "Building&!side1"
+ },
+ "321p": {
+  "level": "321",
+  "file": "recordings/level_321.rec",
+  "sync": true,
+  "endclock": "503",
+  "protect": "Building&!side1"
+ },
+ "400p": {
+  "level": "400",
+  "file": "recordings/level_400_2.rec",
+  "sync": true,
+  "endclock": "470",
+  "protect": "Naval&side0"
+ },
+ "710w": {
+  "level": "710",
+  "file": "recordings/level_710_3.rec",
+  "sync": true,
+  "endclock": "210",
+  "cheat": true
+ },
+ "741w": {
+  "level": "741",
+  "file": "recordings/level_741_5.rec",
+  "sync": true,
+  "endclock": "135",
+  "cheat": true
+ },
+ "523v": {
+  "level": "523",
+  "file": "recordings/level_523_3.rec",
+  "sync": true,
+  "endclock": "385",
+  "cheat": true
+ },
+ "521w": {
+  "level": "521",
+  "file": "recordings/level_521_2.rec",
+  "sync": true,
+  "endclock": "255",
+  "cheat": true
+ },
+ "212w": {
+  "level": "212",
+  "file": "recordings/level_212.rec",
+  "sync": true,
+  "endclock": "300",
+  "cheat": true
+ },
+ "222w": {
+  "level": "222",
+  "file": "recordings/level_222.rec",
+  "sync": true,
+  "endclock": "255",
+  "cheat": true
+ },
+ "612w": {
+  "level": "612",
+  "file": "recordings/level_612_2.rec",
+  "sync": true,
+  "endclock": "275",
+  "cheat": true
+ },
+ "732w": {
+  "level": "732",
+  "file": "recordings/level_732_2.rec",
+  "sync": true,
+  "endclock": "385",
+  "cheat": true
+ },
+ "432w": {
+  "level": "432",
+  "file": "recordings/level_432.rec",
+  "sync": true,
+  "endclock": "260",
+  "cheat": true
+ },
+ "612f": {
+  "level": "612",
+  "file": "recordings/level_612.rec",
+  "sync": true,
+  "endclock": "200",
+  "cheat": true
+ },
+ "732h": {
+  "level": "732",
+  "file": "recordings/level_732_3.rec",
+  "sync": true,
+  "endclock": "390",
+  "cheat": true
+ },
+ "412w": {
+  "level": "412",
+  "file": "recordings/level_412_2.rec",
+  "sync": true,
+  "endclock": "460",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "412d": {
+  "level": "412",
+  "file": "recordings/level_412.rec",
+  "sync": true,
+  "endclock": "300",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "332w": {
+  "level": "332",
+  "file": "recordings/level_332.rec",
+  "sync": true,
+  "endclock": "160",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "322w": {
+  "level": "322",
+  "file": "recordings/level_322.rec",
+  "sync": true,
+  "endclock": "330",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "312w": {
+  "level": "312",
+  "file": "recordings/level_312.rec",
+  "sync": true,
+  "endclock": "390",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "622w": {
+  "level": "622",
+  "file": "recordings/level_622.rec",
+  "sync": true,
+  "endclock": "280",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "524w": {
+  "level": "524",
+  "file": "recordings/level_524.rec",
+  "sync": true,
+  "endclock": "340",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "422w": {
+  "level": "422",
+  "file": "recordings/level_422_2.rec",
+  "sync": true,
+  "endclock": "180",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "422m": {
+  "level": "422",
+  "file": "recordings/level_422.rec",
+  "sync": true,
+  "endclock": "140",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "232w": {
+  "level": "232",
+  "file": "recordings/level_232.rec",
+  "sync": true,
+  "endclock": "320",
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "mp_test": {
+  "level": "menu",
+  "file": "recordings/menu.rec",
+  "sync": true,
+  "options": "recordings/options_20261101.bea",
+  "mp1": true,
+  "secs": 90
+ },
+ "_capture_524w": {
+  "level": "524",
+  "file": "recordings/level_524.rec",
+  "sync": true,
+  "cheat": true,
+  "options": "recordings/options_20261101.bea"
+ },
+ "mp_sniper": {
+  "level": "menu",
+  "file": "recordings/menu_sniper.rec",
+  "sync": true,
+  "mp1": true,
+  "secs": 600
+ },
+ "mp_laser": {
+  "level": "menu",
+  "file": "recordings/menu_laser.rec",
+  "sync": true,
+  "mp1": true,
+  "secs": 600
+ },
+ "mp_blaster": {
+  "level": "menu",
+  "file": "recordings/menu_blaster.rec",
+  "sync": true,
+  "mp1": true,
+  "secs": 600
+ },
+ "menu_goodies": {
+  "level": "menu",
+  "file": "recordings/menu_standard.rec",
+  "sync": true,
+  "mp1": true,
+  "secs": 600,
+  "goodies": true
+ },
+ "_capture_110r": {
+  "level": "110",
+  "file": "recordings/level_110.rec",
+  "sync": true
+ },
+ "session_win": {
+  "level": "menu",
+  "file": "recordings/menu_session_win.rec",
+  "sync": true,
+  "cheat": true,
+  "mp1": true,
+  "secs": 2400
+ },
+ "mp_top4": {
+  "level": "menu",
+  "file": "recordings/menu_top4.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "secs": 900
+ },
+ "901s": {
+  "level": "901",
+  "file": "recordings/level_901.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "213"
+ },
+ "902s": {
+  "level": "902",
+  "file": "recordings/level_902.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "292"
+ },
+ "903s": {
+  "level": "903",
+  "file": "recordings/level_903.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "245"
+ },
+ "904w": {
+  "level": "904",
+  "file": "recordings/level_904.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "159"
+ },
+ "905s": {
+  "level": "905",
+  "file": "recordings/level_905.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "393"
+ },
+ "mp_mid4": {
+  "level": "menu",
+  "file": "recordings/menu_mid4.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": true,
+  "secs": 900
+ },
+ "mp_mid5": {
+  "level": "menu",
+  "file": "recordings/menu_mid5.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": true,
+  "secs": 900
+ },
+ "mp_top5": {
+  "level": "menu",
+  "file": "recordings/menu_top5.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": false,
+  "secs": 900
+ },
+ "mp_top5_2": {
+  "level": "menu",
+  "file": "recordings/menu_top5_2.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": true,
+  "secs": 900
+ },
+ "mp_top6": {
+  "level": "menu",
+  "file": "recordings/menu_top6.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": true,
+  "secs": 900
+ },
+ "mp_mid6": {
+  "level": "menu",
+  "file": "recordings/menu_mid6.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": true,
+  "secs": 900
+ },
+ "mp_bot1": {
+  "level": "menu",
+  "file": "recordings/menu_bot1.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": true,
+  "secs": 900
+ },
+ "mp_bot2": {
+  "level": "menu",
+  "file": "recordings/menu_bot2.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": true,
+  "secs": 900
+ },
+ "mp_bot3": {
+  "level": "menu",
+  "file": "recordings/menu_bot3.rec",
+  "sync": true,
+  "mp1": true,
+  "allmaps": true,
+  "cheat": true,
+  "secs": 900
+ },
+ "_capture_311r": {
+  "level": "311",
+  "file": "recordings/level_311.rec",
+  "sync": true
+ },
+ "_capture_700r": {
+  "level": "700",
+  "file": "recordings/level_700.rec",
+  "sync": true
+ },
+ "611c": {
+  "level": "611",
+  "file": "recordings/level_611_4.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "59"
+ },
+ "800k": {
+  "level": "800",
+  "file": "recordings/level_800_5.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "420"
+ },
+ "500k": {
+  "level": "500",
+  "file": "recordings/level_500_4.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "240"
+ },
+ "session_wingmen": {
+  "level": "menu",
+  "file": "recordings/menu_wingmen.rec",
+  "sync": true,
+  "cheat": true,
+  "mp1": true,
+  "secs": 2400
+ },
+ "800kc": {
+  "level": "800",
+  "file": "recordings/level_800_5.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "99999",
+  "keepgoing": true
+ },
+ "500s": {
+  "level": "500",
+  "file": "recordings/level_500_5.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "270",
+  "options": "recordings/level_500_5.options"
+ },
+ "421k": {
+  "level": "421",
+  "file": "recordings/level_421_3.rec",
+  "sync": true,
+  "cheat": true,
+  "options": "recordings/level_421_3.options"
+ },
+ "421d": {
+  "level": "421",
+  "file": "recordings/level_421_2.rec",
+  "sync": true,
+  "cheat": true,
+  "options": "recordings/level_421_2.options"
+ },
+ "741d": {
+  "level": "741",
+  "file": "recordings/level_741_6.rec",
+  "sync": true,
+  "cheat": true,
+  "options": "recordings/level_741_6.options"
+ },
+ "741kc": {
+  "level": "741",
+  "file": "recordings/level_741_7.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "99999",
+  "keepgoing": true,
+  "options": "recordings/level_741_7.options"
+ },
+ "521g": {
+  "level": "521",
+  "file": "recordings/level_521_3.rec",
+  "sync": true,
+  "cheat": true,
+  "endclock": "320",
+  "options": "recordings/level_521_3.options"
+ }
+}

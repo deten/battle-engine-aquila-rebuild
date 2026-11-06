@@ -1,0 +1,16 @@
+# Graphics profile 2: nVidia GeForceDDR (10de:0101, driver 0004000d0001044e): the cardid.txt settings it applies
+#   Tweak:DISABLE_SNOW=1, Tweak:DXSHADOWS_INVERSE=0, Tweak:DXSHADOWS_INVERSE=1
+#   Tweak:DXTN_IS_16_BIT=1, Tweak:IMPOSTOR_CARD_CANT_ACTUALLY_DO_THEM_IN_16BPP_MODE=1, Tweak:IMPOSTOR_ENABLE=1
+#   Tweak:RENDERSTATE_STATE_BLOCK_MACROS_ENABLE=0, Tweak:SRT_ENABLE=1, Tweak:SRT_POLYGON_SUBRECT_CLEARS=1
+#   Tweak:SRT_Z_BUFFER_DONT_USE_BACKBUFFER_Z=1, Tweak:SRT_Z_BUFFER_USE_SAME_DEPTH=1, Tweak:SRT_Z_BUFFER_USE_SAME_SIZE=1
+level 300
+card 10de:0101:0004000d0001044e
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

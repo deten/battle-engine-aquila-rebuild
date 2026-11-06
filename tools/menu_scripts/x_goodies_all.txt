@@ -1,0 +1,449 @@
+# Every goodie unlocked and opened (captures only: two runs of the original part after the first
+# goodie level): the art pages, the videos, and the goodie levels quit from their pause menu
+goodies 3
+wait 250
+click 320 415
+wait 300
+click 218 383   # Goodies
+wait 150
+click 148 255   # goodie 0
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 193 255   # goodie 1
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 238 255   # goodie 2
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 283 255   # goodie 3
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 328 255   # goodie 4
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 373 255   # goodie 5
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 418 255   # goodie 6
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 463 255   # goodie 7
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 508 255   # goodie 8
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 553 255   # goodie 9
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 148 298   # goodie 10
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 193 298   # goodie 11
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 238 298   # goodie 12
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 283 298   # goodie 13
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 328 298   # goodie 14
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 373 298   # goodie 15
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 418 298   # goodie 16
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 463 298   # goodie 17
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 508 298   # goodie 18
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 553 298   # goodie 19
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 148 341   # goodie 20
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 193 341   # goodie 21
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 238 341   # goodie 22
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 283 341   # goodie 23
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 328 341   # goodie 24
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 373 341   # goodie 25
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 418 341   # goodie 26
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 463 341   # goodie 27
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 508 341   # goodie 28
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 553 341   # goodie 29
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 148 385   # goodie 30
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 193 385   # goodie 31
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 238 385   # goodie 32
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 283 385   # goodie 33
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 328 385   # goodie 34
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 373 385   # goodie 35
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 418 385   # goodie 36
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 463 385   # goodie 37
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 508 385   # goodie 38
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+click 553 385   # goodie 39
+wait 30
+click 615 455   # open
+wait 500
+shot
+key esc
+wait 60
+click 320 323   # Quit (a goodie level)
+wait 60
+click 320 343   # Yes
+wait 400
+shot

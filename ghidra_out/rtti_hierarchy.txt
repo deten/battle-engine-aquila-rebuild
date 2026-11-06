@@ -1,0 +1,709 @@
+# 656 classes with COLs, 733 vtables, 667 type descriptors
+# Multiple-inheritance classes (class : bases):
+#   CPanCamera : CCamera, CMonitor
+#   CControllableCamera : CCamera, IController
+#   CCockpit : CMonitor, IRenderableThing
+#   COggLoader : CWaitingThread, COggFileRead
+#   CScreenOverlay : IRenderableThing, CMonitor
+#   CThing : IAudibleThing, IRenderableThing
+#   CDXFrontEndVideo : CFrontEndVideo, DeviceObject
+#   CDXLandscape : CLandscape, DeviceObject
+#   CDXMeshVB : CMeshVB, DeviceObject
+#   CDXTexture : CTexture, DeviceObject
+#   CDXWater : CWater, DeviceObject
+
+CAtmospherics
+  CClouds
+  CSnow
+CBaseWaveFileRead
+  COggFileRead
+  CWaveSoundRead
+CBSpline
+CCamera
+  CControllableCamera
+  CGenericCamera
+  CInterpolatedCamera
+  CMovieCamera
+  CPanCamera
+  CThing3rdPersonCamera
+  CThingCamera
+  CViewPointCamera
+CConsoleMenu
+  CConsoleCommandMenu
+  CConsoleRootMenu
+  CConsoleVariableMenu
+  CMusicMenu
+  CSoundManagerDebugMenu
+  CVertexShaderMenu
+CController
+  CPCController
+CD3DApplication
+  PCLTShell
+CDataType
+  CBoolDataType
+  CFloatDataType
+  CIntDataType
+  CPositionDataType
+  CStringDataType
+  CThingPtrDataType
+CDebugLog
+CEngine
+  CDXEngine
+CEventManager
+CFrontEndPage
+  CFEPBEConfig
+  CFEPBriefing
+  CFEPCommon
+  CFEPCredits
+  CFEPDebriefing
+  CFEPDevelopment
+  CFEPDevSelect
+  CFEPDirectory
+  CFEPE3LevelSelect
+  CFEPGoodies
+  CFEPIntro
+  CFEPLanguageTest
+  CFEPLevelSelect
+  CFEPLoadGame
+  CFEPMain
+    CFEPDemoMain
+  CFEPMultiplayer
+  CFEPMultiplayerStart
+  CFEPOptions
+  CFEPSaveGame
+  CFEPScreenPos
+  CFEPUnknown
+  CFEPVirtualKeyboard
+  CFEPWingmen
+CGeneralVolume
+  CCylinder
+  CLine
+  CMeshCollisionVolume
+  CSphere
+CHelpTextDisplay
+CImageLoader
+  CTGALoader
+CInitThing
+  CCutsceneInitThing
+  CExplosionInitThing
+  CFeatureInitThing
+  CHazardInitThing
+  CRoundInitThing
+  CSpawnerInitThing
+  CSphereTriggerInitThing
+  CSquadInitThing
+  CStartInitThing
+  CTreeInitThing
+  CUnitInitThing
+    CBattleEngineInitThing
+  CWallInitThing
+CMenuItem
+  CApplyMenuItem
+  CControllerBackMenuItem
+  CControllerDefinition
+  CJoystickEnableItem
+  CMenuMenuItem
+    C3DSoundMethod
+    CBOOLMenuItem
+      CFlipSpeakers
+      CHWSound
+      CnVidia
+      CTrilinear
+      CVSync
+    CConfigName
+    CLandscapeRes
+    CMultiSample
+    CSCModeMenuItem
+    CScreenShape
+    CSoundDeviceSelect
+    CSoundRate
+    CTextureRes
+    CVideoDetailLevel
+    CVideoDeviceSelect
+  CScaleMenuItem
+    CMouseSensitivityMenuItem
+CMenuOptionsList
+  CConfirmMenuOptionsList
+CMissionScriptObjectCode
+CParticleDescriptor
+  CPDColourRange
+  CPDEmitter
+  CPDFoR
+  CPDFunction
+  CPDMesh
+  CPDModifier
+  CPDMover
+  CPDPMesh
+  CPDSelector
+  CPDShape
+  CPDSimpleSprite
+  CPDTimeline
+  CPDTrail
+CPhysicsAlligenceType
+  CEnemyAlligence
+  CFriendlyAlligence
+  CNeutralAlligence
+CPhysicsBehaviourType
+  CBoatUnitBehaviourType
+  CBomberBehaviourType
+  CBuildingUnitBehaviourType
+  CCarrierUnitBehaviourType
+  CCarverBehaviourType
+  CDiveBomberBehaviourType
+  CDropshipBehaviourType
+  CFenrirBehaviourType
+  CFighterBehaviourType
+  CGillMBehaviourType
+  CGroundAttackAircraftBehaviourType
+  CGroundUnitBehaviourType
+  CHiveBossBehaviourType
+  CInfantryUnitBehaviourType
+  CJeepBehaviourType
+  CMechUnitBehaviourType
+  CMineBehaviourType
+  CPodBehaviourType
+  CSentinelBehaviourType
+  CSimpleBuildingBehaviourType
+  CSubmarineBehaviourType
+  CThunderHeadBehaviourType
+  CTurretUnitBehaviourType
+  CWarspiteBehaviourType
+  CWarspiteDomeBehaviourType
+CPhysicsComponentValue
+  CComponentAttackPriority
+  CComponentBasedOn
+  CComponentBig
+  CComponentDeploy
+  CComponentDeployDamageMultiplier
+  CComponentDetach
+  CComponentExplosion
+  CComponentIndiscriminate
+  CComponentLife
+  CComponentLockable
+  CComponentMaxTargetRange
+  CComponentMaxTurretYaw
+  CComponentMaxYaw
+  CComponentMesh
+  CComponentNoise
+  CComponentPassOnHitEffect
+  CComponentSmallExplosion
+  CComponentSweeping
+  CComponentTentacle
+  CComponentTurnRate
+  CComponentTurretTurnRate
+  CComponentUse
+  CComponentUseSpawner
+  CComponentVent
+CPhysicsComponentValueList
+CPhysicsExplosionValue
+  CExplosionAirEffect
+  CExplosionBasedOn
+  CExplosionDamage
+  CExplosionGroundEffect
+  CExplosionLight
+  CExplosionOriented
+  CExplosionRadius
+  CExplosionShockwave
+  CExplosionSmart
+  CExplosionSound
+  CExplosionTime
+  CExplosionUnitEffect
+  CExplosionVolumetric
+  CExplosionWaterEffect
+  CExplosionWaterSound
+CPhysicsExplosionValueList
+CPhysicsFeatureValue
+  CFeatureExplosion
+  CFeatureIcon
+  CFeatureInvincible
+  CFeatureLife
+  CFeatureLockable
+  CFeatureMesh
+  CFeatureNoise
+CPhysicsFeatureValueList
+CPhysicsHazardValue
+  CHazardDamage
+  CHazardEffect
+  CHazardNoise
+  CHazardRadius
+CPhysicsHazardValueList
+CPhysicsNavMapType
+  CFlatNavMapType
+  CMountainousNavMapType
+  CSteepNavMapType
+  CWaterNavMapType
+CPhysicsRoundValue
+  CRoundBasedOn
+  CRoundBeam
+  CRoundBounce
+  CRoundDamage
+  CRoundEffect
+  CRoundExplode
+  CRoundExplosion
+  CRoundFire
+  CRoundFlak
+  CRoundFlakInaccuracy
+  CRoundGravity
+  CRoundGridOfFear
+  CRoundGroundHugging
+  CRoundJumpDelay
+  CRoundJumpRange
+  CRoundJumps
+  CRoundLength
+  CRoundLifeSpan
+  CRoundMesh
+  CRoundMissile
+  CRoundPassiveCollision
+  CRoundProximity
+  CRoundRadius
+  CRoundRearm
+  CRoundSeek
+  CRoundSeekAngle
+  CRoundSeekDelay
+  CRoundSeekTerminationTime
+  CRoundSmart
+  CRoundSoundMaterial
+  CRoundTorpedo
+  CRoundTreeCollision
+  CRoundTurnRate
+  CRoundUnderWater
+  CRoundVelocity
+  CRoundWaterEffect
+  CRoundWeirdoSeek
+  CRoundWiggle
+CPhysicsRoundValueList
+CPhysicsScriptStatement
+  CComponentStatement
+  CExplosionStatement
+  CFeatureStatement
+  CHazardStatement
+  CRoundStatement
+  CSpawnerStatement
+  CUnitStatement
+  CWeaponModeStatement
+  CWeaponStatement
+CPhysicsSeekType
+  CSeekNothing
+  CSeekTarget
+  CSeekTargetOnly
+CPhysicsSpawnerValue
+  CSpawnerAmount
+  CSpawnerBasedOn
+  CSpawnerConditions
+  CSpawnerDelay
+  CSpawnerInfinite
+  CSpawnerMaxRange
+  CSpawnerMinRange
+  CSpawnerPostSpawnDelay
+  CSpawnerPreSpawnDelay
+  CSpawnerRecall
+  CSpawnerSeekDelay
+  CSpawnerSquadDelay
+  CSpawnerSquadSize
+  CSpawnerUnit
+CPhysicsSpawnerValueList
+CPhysicsStateType
+  COffStateType
+  COnfStateType
+  COnStateType
+CPhysicsUnitValue
+  CUnitActivationEffect
+  CUnitAfterburner
+  CUnitAirShieldRegeneration
+  CUnitAirShields
+  CUnitAirTurnRate
+  CUnitAirVelocity
+  CUnitAlligence
+  CUnitAnimatedCollision
+  CUnitAttackPriority
+  CUnitBasedOn
+  CUnitBehaviour
+  CUnitBig
+  CUnitBodyMotion
+  CUnitBounceFactor
+  CUnitBuildingMeshType
+  CUnitBuildingNumber
+  CUnitComponent
+  CUnitDeploy
+  CUnitDeployDamageMultiplier
+  CUnitDetonationDelay
+  CUnitDust
+  CUnitEngines
+  CUnitExplosion
+  CUnitGroundShieldRegeneration
+  CUnitGroundShields
+  CUnitGroundTurnRate
+  CUnitGroundVelocity
+  CUnitGroundWake
+  CUnitHover
+  CUnitIcon
+  CUnitIgnoreThreats
+  CUnitImportance
+  CUnitIndiscriminate
+  CUnitKnockTrees
+  CUnitLegPlacementArea
+  CUnitLegSpeed
+  CUnitLife
+  CUnitLockable
+  CUnitMaxLegsLifted
+  CUnitMaxTargetRange
+  CUnitMaxThrusterHeight
+  CUnitMesh
+  CUnitMinAltitude
+  CUnitMinThrusterHeight
+  CUnitMultipleSpawn
+  CUnitNavMap
+  CUnitNoise
+  CUnitParachute
+  CUnitRetreat
+  CUnitShatter
+  CUnitShieldEffect
+  CUnitSmallExplosion
+  CUnitSmoke
+  CUnitSoundMaterial
+  CUnitSpawnNoise
+  CUnitStandingLegPlacementArea
+  CUnitStealth
+  CUnitStompExplosion
+  CUnitStrafeChange
+  CUnitSweeping
+  CUnitThreat
+  CUnitThrusters
+  CUnitTrails
+  CUnitTurretTurnRate
+  CUnitUse
+  CUnitUseSpawner
+  CUnitVent
+  CUnitWaterWake
+  CUnitWingman
+CPhysicsUnitValueList
+CPhysicsWeaponModeValue
+  CWeaponBasedOn
+  CWeaponBurstDelay
+  CWeaponBurstSize
+  CWeaponClip
+  CWeaponInaccuracy
+  CWeaponLaunchAngle
+  CWeaponLaunchSequence
+  CWeaponLaunchSound
+  CWeaponLockDeflection
+  CWeaponLockMode
+  CWeaponLockRadius
+  CWeaponLockRange
+  CWeaponLockTime
+  CWeaponLockUnit
+  CWeaponMaxDeflection
+  CWeaponMaxLocks
+  CWeaponMaxRange
+  CWeaponMaxTargetHeight
+  CWeaponMinDeflection
+  CWeaponMinRange
+  CWeaponMinTargetHeight
+  CWeaponMuzzleEffect
+  CWeaponMuzzleLight
+  CWeaponMuzzleLightRadius
+  CWeaponPostFireDelay
+  CWeaponPostFireSound
+  CWeaponPower
+  CWeaponPredictive
+  CWeaponPreFireDelay
+  CWeaponPreFireEffect
+  CWeaponPreFireSound
+  CWeaponReloadTime
+  CWeaponRound
+  CWeaponSoundPerBurst
+  CWeaponTrack
+  CWeaponVolleySize
+  CWeaponYawTolerance
+CPhysicsWeaponModeValueList
+CPhysicsWeaponValue
+  CWeaponAdjustAim
+  CWeaponAllowMovement
+  CWeaponAmmoStore
+  CWeaponChargeLevel
+  CWeaponChargeRate
+  CWeaponConsumption
+  CWeaponIconName
+  CWeaponLanguageName
+  CWeaponPlacement
+  CWeaponSmart
+  CWeaponVersusAir
+  CWeaponVersusInfantry
+  CWeaponVersusTanks
+  CWeaponZoomMode
+CPhysicsWeaponValueList
+CRenderThing
+  CRTCutscene
+  CRTMesh
+    CRTBuilding
+  CRTTree
+CSample
+  CPCSample
+CSpawnerData
+CTweak
+  CRenderMethod
+  CTweakFLOAT
+  CTweakSLONG
+CWaitingThread
+  CBinkOpenThread
+  COggLoader
+  CXBOXAsyncCache
+CWaypointPath
+DeviceObject
+  CDXTrees
+  CIBuffer
+    CLandscapeIB
+  CShadows
+  CUMTexture
+    CLandscapeTexture
+  CVBuffer
+    CLandscapeVB
+  CVertexShader
+IListener
+  CMonitor
+    CAnimation
+    CCockpit
+      CDXCockpit
+    CCollisionSeekingThing
+      CCSPersistentThing
+        CCollisionSeekingInfantryBloke
+        CCollisionSeekingRound
+      CCSRay
+    CDestroyableSegment
+      CDestroyableCoreSegment
+      CDestroyableExtraSegment
+        CDestroyableExtraUseMeshSegment
+      CDestroyableSegmentComponent
+      CDestroyableSwapSegment
+    CEquipment
+      CRadarWarningReceiver
+      CWeapon
+    CEventFunction
+    CFearGrid
+    CGuide
+      CAirGuide
+        CBomberGuide
+        CCarverGuide
+        CDiveBomberGuide
+        CGroundAttackGuide
+      CBoatGuide
+      CCarrierGuide
+      CComponentGuide
+      CDropshipGuide
+      CGroundVehicleGuide
+      CHiveBossGuide
+      CInfantryGuide
+      CMechGuide
+      CSubmarineGuide
+      CTentacleGuide
+      CTerrainGuide
+      CThunderheadGuide
+    CHLCollisionDetector
+    CInfluenceMap
+    CMessageBox
+    CMotionController
+      CDestructableSegmentsMotionController
+        CMCHiveBoss
+      CMCBuggy
+      CMCCannon
+      CMCComponent
+      CMCDropship
+      CMCGroundAttack
+      CMCGroundVehicle
+      CMCMech
+        CMCBattleEngine
+        CMCGillM
+        CMCThunderHead
+      CMCMine
+      CMCSentinel
+      CMCTentacle
+      CMCWarspiteDome
+    CPostEventData
+    CScriptEventNB
+    CSpawner
+    CUnitAI
+      CBoatAI
+      CBomberAI
+      CCarrierAI
+      CCarverAI
+      CComponentBomberAI
+      CDiveBomberAI
+      CDropshipAI
+      CFenrirMainGunAI
+      CGillMAI
+      CGillMHeadAI
+      CGroundAttackAI
+      CInfantryAI
+      CMechAI
+      CPlaneAI
+      CRepairPadAI
+      CSentinelAI
+      CSubmarineAI
+      CTentacleAI
+      CWarspiteAI
+      CWarspiteDomeAI
+    CVM
+    IAudibleThing
+      CMessage
+      CThing
+        CComplexThing
+          CActor
+            CEscapePod
+            CFeature
+            CNamedMesh
+              CBuildingNamedMesh
+            CRocket
+            CRound
+              CMissile
+            CShell
+            CUnit
+              CAirUnit
+                CBigAirUnit
+                  CBomber
+                  CCarrier
+                    CFenrir
+                  CDropship
+              CBattleEngine
+              CBuilding
+              CComponent
+                CGillMHead
+                CTentacle
+              CGroundUnit
+                CBoat
+                CCannon
+                CGroundVehicle
+                CInfantryUnit
+                CMech
+                  CGillM
+                  CThunderHead
+                  CWarspite
+                CMine
+                CSentinel
+                CWarspiteDome
+              CHiveBoss
+              CPod
+              CRadar
+              CSimpleBuilding
+              CSubmarine
+          CAnimal
+          CCutscene
+          CDebris
+          CExplosion
+          CHazard
+          CInfluenceNode
+          CLevelScriptThing
+          CSafeSide
+          CSpawnerThing
+          CSpawnPoint
+          CSphereTrigger
+          CSquad
+            CNormalSquad
+            CRelaxedSquad
+          CStart
+          CWingmanStart
+        CTree
+        CWaypoint
+    IController
+      CFMV
+        CDXFMV
+      CFrontEnd
+        CDXFrontEnd
+      CGame
+        CDXGame
+      CGameCreditControlHandler
+      CGameInterface
+      CGameMenu
+        CLevelBriefingLog
+        CMessageLog
+        CPauseMenu
+        CSimpleGameMenu
+      CPlayer
+      CReconnectInterface
+      CWaitForStart
+    IScript
+IRenderableThing
+  CFrontEndThing
+  CScreenOverlay
+type_info
+
+[base without own vtable: CAsmInstruction]
+CAsmInstruction
+  CInstructionOP_AND
+  CInstructionOP_CALL
+  CInstructionOP_CALLLOCAL
+  CInstructionOP_CMP
+  CInstructionOP_CMPB
+  CInstructionOP_CMPNEB
+  CInstructionOP_DIVIDE
+  CInstructionOP_GETTOP
+  CInstructionOP_GREAT_EQ_THAN
+  CInstructionOP_GREAT_THAN
+  CInstructionOP_JMP
+  CInstructionOP_JMPFALSE
+  CInstructionOP_JMPNE
+  CInstructionOP_LABEL
+  CInstructionOP_LESS_EQ_THAN
+  CInstructionOP_LESS_THAN
+  CInstructionOP_MINUS
+  CInstructionOP_MULTIPLY
+  CInstructionOP_NOP
+  CInstructionOP_OR
+  CInstructionOP_PLUS
+  CInstructionOP_POINTER
+  CInstructionOP_POP
+  CInstructionOP_PUSH
+  CInstructionOP_PUSHPC
+  CInstructionOP_REMOVE_TOP
+  CInstructionOP_RETURN
+
+[base without own vtable: CBitmapFont]
+CBitmapFont
+  CDXBitmapFont
+    CDXBitmapDebugFont
+
+[base without own vtable: CDetailItem]
+CDetailItem
+  CShadowDetail
+  CTreeDetail
+
+[base without own vtable: CDXBitmapFont]
+CDXBitmapFont  (dup)
+
+[base without own vtable: CDXTexture]
+CDXTexture
+  CBLTexture
+
+[base without own vtable: CFrontEndVideo]
+CFrontEndVideo
+  CDXFrontEndVideo
+
+[base without own vtable: CLandscape]
+CLandscape
+  CDXLandscape
+
+[base without own vtable: CMeshVB]
+CMeshVB
+  CDXMeshVB
+
+[base without own vtable: CMusic]
+CMusic
+  CPCMusic
+
+[base without own vtable: CSmallAirUnit]
+CSmallAirUnit
+  CCarver
+  CDiveBomber
+  CGroundAttackAircraft
+  CPlane
+
+[base without own vtable: CTexture]
+CTexture
+  CDXTexture  (dup)
+
+[base without own vtable: CThreeWay]
+CThreeWay
+  CEnable32Bit
+
+[base without own vtable: CWater]
+CWater
+  CDXWater

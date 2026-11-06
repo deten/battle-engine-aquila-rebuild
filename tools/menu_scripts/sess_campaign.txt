@@ -1,0 +1,104 @@
+# A session: load the save, 2.12 left idle to its defeat, Retry, quit to the debriefing, 2.21 with a
+# jet flight, quit, the main menu, a multiplayer game on a locked map (BEA_MPMAPS), back to the menu.
+# The user's idea (2026-11-02): menus, loading, play, endings and the way back in one run.
+exclusive
+env BEA_MPMAPS 1     # the locked multiplayer maps open (test_harness.cpp)
+wait 250
+click 320 415
+wait 300
+click 218 343   # Load Game
+wait 150
+click 170 145   # the save
+wait 60
+click 615 455   # forward: briefing 2.21
+wait 200
+click 25 455    # back: level select
+wait 200
+click 145 290   # 2.12
+wait 60
+click 615 455   # forward: briefing
+wait 200
+click 615 455   # forward: the level loads
+wait 12500      # idle until the firebase falls
+shot
+move 320 350
+wait 30
+click 320 350   # Retry
+wait 900
+shot
+key esc
+wait 60
+move 320 323
+wait 30
+click 320 323   # Quit
+wait 100
+move 320 343
+wait 30
+click 320 343   # Yes
+wait 300
+shot
+wait 300
+shot
+click 615 455   # forward
+wait 300
+shot
+wait 300
+shot
+click 250 350   # 2.21
+wait 60
+click 615 455   # forward: briefing
+wait 200
+click 615 455   # forward: the level loads
+wait 700
+hold w 240      # walk
+key space       # transform: jet
+wait 30
+hold w 300
+hold tab 120     # a column-1 action key
+key space       # back to walker
+wait 120
+shot
+key esc
+wait 60
+move 320 323
+wait 30
+click 320 323   # Quit
+wait 100
+move 320 343
+wait 30
+click 320 343   # Yes
+wait 300
+shot
+click 615 455   # forward from the debriefing
+wait 300
+click 25 455    # back
+wait 200
+shot
+click 25 455    # back
+wait 200
+shot
+click 218 363   # Multiplayer
+wait 150
+shot
+click 385 258   # mode 0, 4th map (locked without BEA_MPMAPS)
+wait 60
+click 615 455   # forward: configuration
+wait 150
+shot
+click 615 455   # forward: the game
+wait 600
+hold w 200
+key space
+wait 30
+hold w 200
+shot
+key esc
+wait 60
+click 320 323   # Quit
+wait 60
+click 320 343   # Yes
+wait 300
+shot
+click 25 455    # back: main menu
+wait 200
+shot

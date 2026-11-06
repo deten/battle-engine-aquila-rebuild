@@ -1,0 +1,17 @@
+# Graphics profile 1: 3dfx Voodoo_5500_AGP (121a:0009, driver newest): the cardid.txt settings it applies
+#   Tweak:BATTLELINE_METHOD=0, Tweak:IMPOSTOR_ENABLE=0, Tweak:LANDSCAPE_LOWRES=1
+#   Tweak:LANDSCAPE_MAXLEVELS=1, Tweak:LANDSCAPE_METHOD=0, Tweak:LANDSCAPE_TEXTURES_MANAGED=1
+#   Tweak:NO_LAZY_LOAD_TEXTURES=1, Tweak:RENDERSTATE_TWEAK_CARD_CANT_DO_GLOSSMAP=1, Tweak:RENDERSTATE_TWEAK_CARD_CANT_DO_HWTNL=1
+#   Tweak:SHADOW_METHOD=0, Tweak:SQUARE_TEXTURES_ONLY=1, Tweak:SRT_ENABLE=0
+#   Tweak:TEXTURE_RES_LOSS_SHIFT=2
+level 300
+card 121a:0009:7fffffff00000000
+wait 60
+shot
+wait 60
+shot
+key space       # transform: jet
+hold w 200      # accelerate over the island
+shot
+wait 100
+shot

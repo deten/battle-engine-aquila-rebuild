@@ -1,0 +1,29 @@
+# Title screen, main menu hover highlights, language selector
+wait 30
+shot
+wait 70
+shot
+wait 150
+click 320 415   # "Click to start"
+wait 300
+shot
+move 218 343    # hover Load Game
+wait 30
+shot
+move 218 423    # hover Quit
+wait 30
+shot
+move 218 323    # hover Continue Game (disabled)
+wait 30
+shot
+click 285 267   # language: next
+wait 60
+shot
+click 285 267
+wait 60
+shot
+click 155 267   # language: back twice
+wait 30
+click 155 267
+wait 60
+shot

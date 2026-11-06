@@ -1,0 +1,28 @@
+# New game: name entry, training level, briefing, configuration
+exclusive
+wait 250
+click 320 415
+wait 300
+click 218 303   # New Game
+wait 300
+shot
+key backspace
+key backspace
+key backspace
+key backspace
+key backspace
+key t
+key e
+key s
+key t
+wait 30
+shot
+click 615 455
+wait 200
+shot
+click 615 455
+wait 200
+shot
+click 615 455
+wait 200
+shot

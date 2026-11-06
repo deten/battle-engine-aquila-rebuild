@@ -1,0 +1,36 @@
+# Goodies grid and the multiplayer modes
+wait 250
+click 320 415
+wait 300
+click 218 383   # Goodies
+wait 150
+shot
+click 192 255
+wait 60
+shot
+click 417 300
+wait 60
+shot
+click 552 390
+wait 60
+shot
+click 20 455
+wait 150
+click 218 363   # Multiplayer
+wait 150
+shot
+click 228 258
+wait 60
+shot
+click 148 318
+wait 60
+shot
+click 228 378
+wait 60
+shot
+click 615 455   # forward
+wait 200
+shot
+click 615 455
+wait 200
+shot

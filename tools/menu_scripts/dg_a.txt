@@ -1,0 +1,10 @@
+# Dodge too fast: A down, D down 6 frames (0.1 s) later: no dash (the window is 0.1-0.2 s)
+level 300
+wait 119
+shot
+hold a 6
+hold d 6
+wait 6
+shot
+wait 24
+shot

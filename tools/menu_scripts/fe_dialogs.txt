@@ -1,0 +1,28 @@
+# The overwrite-save confirmation, the sound sliders, a video setting
+wait 250
+click 320 415
+wait 300
+click 218 303   # New Game
+wait 300
+click 170 145   # pick the existing name BEA 1
+wait 30
+click 615 455   # forward: "already exists, overwrite?"
+wait 100
+shot
+click 320 280   # No
+wait 100
+shot
+click 20 455    # back to the main menu
+wait 150
+click 218 403   # Options
+wait 150
+click 320 273   # Sound Options
+wait 150
+shot
+click 428 203   # sound volume up
+wait 20
+click 333 223   # music volume down
+wait 20
+click 360 243   # swap speakers
+wait 40
+shot

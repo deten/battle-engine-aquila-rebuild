@@ -1,0 +1,10 @@
+# Multiplayer map 861 recorded by the person (record_level.ps1 -Level menu -Label mid4), as a tour.
+# Frames count from launch; play started at launch frame 797.
+env BEA_MP_ONEPLAYER 1
+env BEA_SYNCJOBS 1
+env BEA_CHEAT 1
+env BEA_MPMAPS 1
+env BEA_OPTIONS_FILE recordings/menu_mid4.options
+recording recordings/menu_mid4.rec
+shotat 857 1397 2597 4397 6797 9797
+end 10897

@@ -1,0 +1,20 @@
+# Level 3.00 flight: transform to jet, accelerate, transform back to walker in
+# the air, retro thrusters (Left Shift) held through the fall.  The user's
+# tutorial landing with Shift held "smashed into the earth" (2026-10-28); here
+# the full port first differed from the original at the transform (a 1-shade
+# pixel at play frame 120, the whole picture by 450).
+level 300
+wait 119
+key space
+shot
+hold w 290
+shot
+key space
+wait 27
+hold shift 120
+shot
+wait 30
+hold shift 130
+shot
+wait 150
+shot
