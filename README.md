@@ -1,5 +1,7 @@
 # Battle Engine Aquila rebuild
 
+> **Pre-source snapshot:** everything I did before I knew the game's source code had been released is preserved, unchanged, at the tag **[pre-source-2026-11-05](https://github.com/deten/battle-engine-aquila-rebuild/tree/pre-source-2026-11-05)**. Anything added to this repository after that may use the released source or onslaught-decomp as a reference, and says so.
+
 A rebuild of the PC game *Battle Engine Aquila* (Lost Toys, 2003) that runs inside the original game. Each of the game's functions was rewritten as C++ and swapped in one at a time, and every swap was tested against the original game until it behaved the same.
 
 **This repository contains no game files.** You need your own copy of the game (the Windows `BEA.exe`, SHA-256 starting `74154bfae14d`).
