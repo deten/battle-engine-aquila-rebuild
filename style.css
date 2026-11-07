@@ -1,0 +1,272 @@
+/* Battle Engine Aquila Rebuild - site style.
+   Inspired by the game's front end (deep blue swirls, chrome titles, silver frame arcs,
+   cyan highlights, the lime-green labels of its Controller Options page). Every shape here
+   is drawn with CSS or inline SVG; no game art is used. */
+
+:root {
+  --navy-0: #040919;
+  --navy-1: #0a1533;
+  --navy-2: #13265a;
+  --navy-3: #1d3a80;
+  --blue: #3f74d8;
+  --cyan: #6fcfff;
+  --lime: #a9e84a;
+  --chrome-hi: #ffffff;
+  --chrome: #c4cee6;
+  --chrome-lo: #66728f;
+  --text: #dde5f6;
+  --muted: #9aa8c8;
+  --panel: rgba(9, 19, 48, 0.78);
+  --edge: rgba(176, 188, 214, 0.32);
+  --radius: 14px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background-color: var(--navy-0);
+  background-image:
+    radial-gradient(1200px 600px at 15% -10%, rgba(63, 116, 216, 0.35), transparent 60%),
+    radial-gradient(900px 700px at 100% 35%, rgba(29, 58, 128, 0.55), transparent 65%),
+    radial-gradient(700px 500px at -10% 85%, rgba(63, 116, 216, 0.22), transparent 60%),
+    repeating-radial-gradient(circle at 70% 20%, rgba(111, 207, 255, 0.035) 0 2px, transparent 2px 46px),
+    linear-gradient(180deg, var(--navy-1), var(--navy-0) 70%);
+  background-attachment: fixed;
+  color: var(--text);
+  font: 400 18px/1.6 "Rajdhani", "Segoe UI", system-ui, sans-serif;
+}
+
+a { color: var(--cyan); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--chrome-hi); }
+
+code {
+  font: 500 0.88em/1 "Consolas", "Cascadia Mono", monospace;
+  background: rgba(111, 207, 255, 0.1);
+  border: 1px solid rgba(111, 207, 255, 0.25);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+/* the chrome lettering of the game's title and menus */
+.chrome {
+  font-family: "Exo 2", "Rajdhani", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  background: linear-gradient(180deg, var(--chrome-hi) 0%, #dfe6f6 38%, var(--chrome-lo) 50%, #aeb9d4 62%, var(--chrome-hi) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.55)) drop-shadow(0 0 18px rgba(111, 207, 255, 0.25));
+}
+
+/* top bar */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  padding: 0.6rem max(16px, calc((100% - 1080px) / 2));
+  background: linear-gradient(180deg, rgba(4, 9, 25, 0.95), rgba(4, 9, 25, 0.75));
+  border-bottom: 1px solid var(--edge);
+  backdrop-filter: blur(6px);
+}
+.bar .mark { font-size: 1.15rem; text-decoration: none; }
+.bar nav { display: flex; flex-wrap: wrap; gap: 0.2rem 1.1rem; margin-left: auto; }
+.bar nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+}
+.bar nav a:hover { color: var(--lime); }
+
+/* hero with the silver frame arcs */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 5.5rem 16px 4.5rem;
+  text-align: center;
+}
+.hero svg.arcs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.hero h1 {
+  position: relative;
+  margin: 0;
+  font-size: clamp(1.8rem, 8.2vw, 4.8rem);
+  overflow-wrap: anywhere;
+  line-height: 1.05;
+}
+.hero h1 .small { display: block; font-size: 0.42em; letter-spacing: 0.35em; margin-top: 0.4rem; font-style: normal; }
+.hero p.tagline {
+  position: relative;
+  max-width: 44rem;
+  margin: 1.4rem auto 0;
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.hero .buttons { position: relative; margin-top: 2rem; display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+
+.button {
+  display: inline-block;
+  padding: 0.55rem 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--navy-0);
+  background: linear-gradient(180deg, #ffffff, #b9c4de 55%, #8e9abb);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.button:hover { color: var(--navy-0); background: linear-gradient(180deg, #ffffff, var(--cyan)); }
+.button.ghost {
+  color: var(--chrome-hi);
+  background: linear-gradient(180deg, rgba(111, 207, 255, 0.28), rgba(63, 116, 216, 0.18));
+  outline: 1px solid rgba(111, 207, 255, 0.55);
+  outline-offset: -1px;
+}
+.button.ghost:hover { color: var(--chrome-hi); background: rgba(111, 207, 255, 0.35); }
+
+/* the self-playing ASCII battle (website/banner.py; frames played by a CSS step animation) */
+.banner {
+  background:
+    radial-gradient(800px 140px at 50% 50%, rgba(63, 116, 216, 0.10), transparent 70%),
+    #05050b;
+  border-top: 1px solid var(--edge);
+  border-bottom: 1px solid var(--edge);
+  box-shadow: inset 0 10px 24px rgba(0, 0, 0, 0.6), inset 0 -10px 24px rgba(0, 0, 0, 0.6);
+  font: 700 min(15px, calc((100vw - 8px) / 58))/1.2 "Consolas", "Cascadia Mono", "Courier New", monospace;
+  padding: 0.6em 0;
+}
+.banner .window { position: relative; width: 56em; margin: 0 auto; overflow: hidden; }
+.banner pre {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  font: inherit;
+  line-height: 1.2em;
+  white-space: pre;
+}
+.banner .bg { color: #241a3c; }
+.banner i { font-style: normal; }
+.banner .b { color: #57b2ff; text-shadow: 0 0 6px #2d8cff, 0 0 14px rgba(45, 140, 255, 0.6); }
+.banner .c { color: #8ff0ff; text-shadow: 0 0 6px #33d6ff; }
+.banner .r { color: #ff4057; text-shadow: 0 0 6px #ff1d3c; }
+.banner .y { color: #ffe14d; text-shadow: 0 0 8px #ffb000; }
+.banner .o { color: #ff9a33; text-shadow: 0 0 7px #ff6a00; }
+.banner .g { color: #53d86a; text-shadow: 0 0 5px #1f9e3a; }
+.banner .n { color: #a8743f; text-shadow: 0 0 4px #6b4219; }
+.banner .s { color: #34507e; text-shadow: 0 0 4px rgba(52, 80, 126, 0.7); }
+.banner .w { color: #f2fdff; text-shadow: 0 0 6px #7fe9ff, 0 0 14px #2fb8ff, 0 0 22px rgba(47, 184, 255, 0.6); }
+.banner .d { color: #6b6f86; }
+@media (prefers-reduced-motion: reduce) { .banner .reel { animation: none; } }
+
+/* page body */
+main { max-width: 1080px; margin: 0 auto; padding: 0 16px 3rem; }
+main, section, .panel, .stat { min-width: 0; }
+.panel { overflow-wrap: anywhere; }
+
+section { margin: 3.2rem 0; scroll-margin-top: 4rem; }
+
+.kicker {
+  display: block;
+  color: var(--lime);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+}
+
+h2 { margin: 0 0 1rem; font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.15; }
+
+h3 {
+  margin: 0 0 0.4rem;
+  font: 700 1.15rem/1.25 "Exo 2", sans-serif;
+  color: var(--cyan);
+}
+
+.panel {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.6rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+.panel::before {
+  /* a thin cyan sweep along the top edge, like the menus' highlight bars */
+  content: "";
+  position: absolute;
+  left: 1.6rem;
+  right: 35%;
+  top: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), transparent);
+  border-radius: 2px;
+}
+.panel p:first-child, .panel ul:first-child { margin-top: 0; }
+.panel p:last-child, .panel ul:last-child { margin-bottom: 0; }
+
+ul { padding-left: 1.2rem; }
+li { margin: 0.35rem 0; }
+li::marker { color: var(--lime); }
+
+/* the numbers */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(165px, 100%), 1fr));
+  gap: 1rem;
+}
+.stat {
+  background: linear-gradient(180deg, rgba(29, 58, 128, 0.55), rgba(9, 19, 48, 0.85));
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.2rem 1rem;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+}
+.stat .value { display: block; font-size: 2.1rem; line-height: 1.1; }
+.stat .label { display: block; margin-top: 0.35rem; color: var(--muted); font-size: 0.98rem; line-height: 1.35; }
+
+/* problem cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 1rem; }
+.cards .panel { padding: 1.2rem 1.3rem; }
+.cards .panel p { margin: 0; color: var(--text); }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+footer {
+  border-top: 1px solid var(--edge);
+  padding: 1.6rem 16px 2.4rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  text-align: center;
+}
+footer p { max-width: 52rem; margin: 0.5rem auto; }
+
+@media (max-width: 720px) {
+  body { font-size: 17px; }
+  .bar { gap: 0.6rem; flex-wrap: wrap; }
+  .bar nav { margin-left: 0; }
+  .two { grid-template-columns: 1fr; }
+  .hero { padding: 3.5rem 16px 3rem; }
+  .hero p.tagline { font-size: 1.08rem; }
+  .stat .value { font-size: 1.7rem; }
+  .panel { padding: 1.1rem 1.1rem; }
+}
