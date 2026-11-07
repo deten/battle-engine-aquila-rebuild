@@ -68,6 +68,10 @@ Set as environment variables before starting the game (the test tools set the us
 | `BEA_VIDEOCLOCK=1` | Bink movies advance on game time. |
 | `BEA_FPSCLOCK=1` | The game's frame-rate meter reports the fixed rate, clock reads are counted per thread, and the win/lose moment is taken on the exact frame. |
 | `BEA_WITH_SOUND=1`, `BEA_WITH_FMV=1` | Test runs with sound or movies on (they are off by default). |
+| `BEA_TAPE_OUT=<file>` | While a recording replays, write the input the game receives as an [Onslaught CE](https://github.com/dlprentice/onslaught-ce) tape. *(Added after the snapshot.)* |
+| `BEA_PROBES=<file>` | Write Onslaught CE's state probes (`P <frame> <NAME> <hex>`) every 50 frames, for comparing a port with the original. *(Added after the snapshot.)* |
+
+Test runs also use the US English keyboard layout for the game process only, whatever the PC's layout is: the menus name keys through Windows, so another layout changes their pictures. *(Added after the snapshot.)* `tools/ce_export.py` exports tapes and probes for every recording, `tools/ce_probe_compare.py` compares two probe files, and `tools/recording_catalog.py` lists every recording with its settings.
 
 ## License
 

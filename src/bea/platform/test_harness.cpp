@@ -211,10 +211,126 @@ void load_replay(const char* path)
 // dragging its frame would (tools/menu_test.py `resize W H`)
 const UINT REPLAY_RESIZE = 0x8bea;
 
+// BEA_TAPE_OUT=<file> (with BEA_REPLAY): the input a replay gives the game, written as an
+// onslaught-ce tape ("# onslaught tape 2": K keys, W window mouse, M DirectInput mouse per
+// frame), so the same playthrough can be replayed in that port (2026-11-06).  Frame F is the
+// F-th Present; a frame's window messages are posted at Present F, and the mouse reads made
+// while the game builds the next frame are frame F's M line, as in that port's replay.cpp.
+FILE* g_tape = nullptr;
+long g_tape_dx = 0, g_tape_dy = 0, g_tape_wheel = 0;
+int g_tape_buttons = 0, g_tape_last_buttons = 0;
+bool g_tape_moved = false;
+
+void tape_open()
+{
+    static bool tried = false;
+    if (tried) return;
+    tried = true;
+    char p[MAX_PATH];
+    if (!GetEnvironmentVariableA("BEA_TAPE_OUT", p, sizeof p)) return;
+    if (!(g_tape = fopen(p, "w"))) { bea_log("tape: cannot write %s", p); return; }
+    // windowed test runs always draw a 640x480 back buffer
+    fprintf(g_tape, "# onslaught tape 2\n# written by the original game's replay harness (BEA_TAPE_OUT)\nW_CLIENT 640 480\n");
+    bea_log("tape: writing %s", p);
+}
+
+void tape_msg(UINT msg, WPARAM wp, LPARAM lp)
+{
+    if (!g_tape) return;
+    long f = g_fixed_frames;
+    const char* kind = nullptr;
+    switch (msg) {
+    case WM_KEYDOWN: case WM_SYSKEYDOWN:
+        fprintf(g_tape, "K %ld down %x %x\n", f, (unsigned)wp, (unsigned)((lp >> 16) & 0xff)); return;
+    case WM_KEYUP: case WM_SYSKEYUP:
+        fprintf(g_tape, "K %ld up %x %x\n", f, (unsigned)wp, (unsigned)((lp >> 16) & 0xff)); return;
+    case WM_MOUSEMOVE: kind = "move"; break;
+    case WM_LBUTTONDOWN: case WM_LBUTTONDBLCLK: kind = "ldown"; break;
+    case WM_LBUTTONUP: kind = "lup"; break;
+    case WM_RBUTTONDOWN: case WM_RBUTTONDBLCLK: kind = "rdown"; break;
+    case WM_RBUTTONUP: kind = "rup"; break;
+    case WM_MBUTTONDOWN: kind = "mdown"; break;
+    case WM_MBUTTONUP: kind = "mup"; break;
+    case WM_MOUSEWHEEL: kind = "wheel"; break;
+    default: return;
+    }
+    fprintf(g_tape, "W %ld %s %d %d %lx\n", f, kind, (int)(short)LOWORD(lp), (int)(short)HIWORD(lp), (unsigned long)wp);
+}
+
+// a DirectInput mouse state the replay returned (DIMOUSESTATE / DIMOUSESTATE2)
+void tape_mouse(DWORD size, const void* data)
+{
+    if (!g_tape || (size != 16 && size != 20)) return;
+    const LONG* v = static_cast<const LONG*>(data);
+    const unsigned char* b = static_cast<const unsigned char*>(data) + 12;
+    g_tape_dx += v[0]; g_tape_dy += v[1]; g_tape_wheel += v[2];
+    g_tape_buttons = ((b[0] & 0x80) ? 1 : 0) | ((b[1] & 0x80) ? 2 : 0) | ((b[2] & 0x80) ? 4 : 0);
+    g_tape_moved = true;
+}
+
+// at Present F+1: frame F's mouse line, when it moved or a button changed
+void tape_frame(long frame)
+{
+    if (!g_tape) return;
+    if (g_tape_moved && (g_tape_dx || g_tape_dy || g_tape_wheel || g_tape_buttons != g_tape_last_buttons)) {
+        fprintf(g_tape, "M %ld %ld %ld %ld %d\n", frame, g_tape_dx, g_tape_dy, g_tape_wheel, g_tape_buttons);
+        g_tape_last_buttons = g_tape_buttons;
+    }
+    g_tape_dx = g_tape_dy = g_tape_wheel = 0;
+    g_tape_moved = false;
+    if ((frame & 63) == 0) fflush(g_tape);
+}
+
+// BEA_PROBES=<file>: onslaught-ce's state probes (replay.cpp Probe: `P <frame> <NAME> <hex>`)
+// every BEA_PROBE_EVERY (50) Presents, read from the original: EVT/EVN the event manager
+// (0x672fc8: time +8, events processed +0xc), FT/SC/LVL the game (0x8a9a98 +0x398, +0xf4,
+// +0x2a0), RNG its generator (+0x304, 8 bytes), POS/LIFE the player's Battle Engine (+0x1c,
+// +0xf8).  A missing object gives zero bytes, as theirs does.
+FILE* g_probes = nullptr;
+long g_probe_every = 50;
+
+void probe_hex(long frame, const char* name, const void* p, size_t n)
+{
+    static const unsigned char zero[16] = {};
+    if (!p || IsBadReadPtr(p, n)) p = zero;
+    fprintf(g_probes, "P %ld %s ", frame, name);
+    for (size_t i = 0; i < n; ++i) fprintf(g_probes, "%02x", static_cast<const unsigned char*>(p)[i]);
+    fputc('\n', g_probes);
+}
+
+void probes_frame(long frame)
+{
+    static bool tried = false;
+    if (!tried) {
+        tried = true;
+        char p[MAX_PATH], e[16];
+        if (GetEnvironmentVariableA("BEA_PROBES", p, sizeof p)) {
+            if (!(g_probes = fopen(p, "w"))) bea_log("probes: cannot write %s", p);
+            if (GetEnvironmentVariableA("BEA_PROBE_EVERY", e, sizeof e) && atol(e) > 0) g_probe_every = atol(e);
+            if (g_probes) bea_log("probes: writing %s every %ld frames", p, g_probe_every);
+        }
+    }
+    if (!g_probes || frame % g_probe_every) return;
+    const char* em = reinterpret_cast<const char*>(0x00672fc8);
+    const char* game = reinterpret_cast<const char*>(0x008a9a98);
+    probe_hex(frame, "EVT", em + 0x8, 4);
+    probe_hex(frame, "EVN", em + 0xc, 4);
+    probe_hex(frame, "FT", game + 0x398, 4);
+    probe_hex(frame, "SC", game + 0xf4, 4);
+    probe_hex(frame, "LVL", game + 0x2a0, 4);
+    const char* rng = *reinterpret_cast<const char* const*>(game + 0x304);
+    probe_hex(frame, "RNG", rng, 8);
+    const char* player = *reinterpret_cast<const char* const*>(game + 0x2a4);
+    const char* be = player && !IsBadReadPtr(player + 0x1c, 4) ? *reinterpret_cast<const char* const*>(player + 0x1c) : nullptr;
+    probe_hex(frame, "POS", be ? be + 0x1c : nullptr, 12);
+    probe_hex(frame, "LIFE", be ? be + 0xf8 : nullptr, 8);
+    fflush(g_probes);
+}
+
 void replay_post(const RecMsg& m)
 {
     if (!g_game_hwnd) return;
-    if (m.msg != REPLAY_RESIZE) { PostMessageA(g_game_hwnd, m.msg, m.wp, m.lp); return; }
+    if (m.msg != REPLAY_RESIZE) { tape_msg(m.msg, m.wp, m.lp); PostMessageA(g_game_hwnd, m.msg, m.wp, m.lp); return; }
     RECT r = { 0, 0, (LONG)m.wp, (LONG)m.lp };
     AdjustWindowRectEx(&r, (DWORD)GetWindowLongA(g_game_hwnd, GWL_STYLE), GetMenu(g_game_hwnd) != nullptr,
                        (DWORD)GetWindowLongA(g_game_hwnd, GWL_EXSTYLE));
@@ -413,6 +529,7 @@ HRESULT WINAPI GetDeviceState_hook(void* dev, DWORD size, void* data)
             if (s.phase < ph || (s.phase == ph && s.call <= call)) memcpy(data, s.data, s.size < size ? s.size : size);
             else if (s.phase > ph) break;
         }
+        tape_mouse(size, data);
         stack_scrub();
         return S_OK;
     }
@@ -1566,7 +1683,12 @@ HRESULT WINAPI Present_hook(void* dev, const RECT* src, const RECT* dst, HWND wn
                 g_dev_calls[0], g_dev_calls[1], g_cursor_calls, (double)*reinterpret_cast<volatile float*>(0x00672fd0), bx, by, bz, bh, rnd, mx, my);
         peek_log(frame - g_play0);
     }
-    if (g_replaying) replay_frame(frame);
+    probes_frame(frame);
+    if (g_replaying) {
+        tape_open();
+        tape_frame(frame - 1);
+        replay_frame(frame);
+    }
     cheat_frame();
     console_frame();
     goodies_frame();
@@ -2337,6 +2459,15 @@ void bea_install_harness()
     if (d3d != MH_OK) bea_log("harness: Direct3DCreate9 hook failed: %s", MH_StatusToString(d3d));
     MH_EnableHook(MH_ALL_HOOKS);
     install_fixed_clock();
+    // Test runs (the fixed clock) use the US English keyboard layout, whatever this PC's active
+    // layout is: the game names keys through Windows (Controller Options) and turns key presses
+    // into typed characters with it.  With Norwegian active, fe_controls and fe_options showed
+    // "MELLOMROM" for Space and differed from their shots, original included (2026-11-06).
+    // KLF_SETFORPROCESS: this process only; no change to the PC's settings.
+    if (g_fixed_step > 0) {
+        HKL us = LoadKeyboardLayoutA("00000409", KLF_ACTIVATE | KLF_SETFORPROCESS);
+        bea_log("harness: keyboard layout %s for this process (test run)", us ? "US English" : "unchanged (US English not available)");
+    }
     install_soundclock();
     install_videoclock();
     install_protect();
