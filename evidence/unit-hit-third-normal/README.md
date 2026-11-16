@@ -4,7 +4,7 @@ Supporting files for the "It happens in real play" note in onslaught-preservatio
 `mechanics/unit-damage-and-contact.md`. Everything here was made by replaying my own recorded play in the Steam retail
 `BEA.exe` (SHA-256 `74154bfae14ddc8ecb87a0766f5bc381c7b7f1ab334ed7a753040eda1e1e7750`) with my test harness on its
 fixed-step clock, with none of my rebuilt functions active, and in Onslaught CE 0.1.13 built from its tag with the
-same clock. No game files, game bytes or personal details are included. Numbers are written as the hex bits of
+same clock. Numbers are written as the hex bits of
 32-bit floats.
 
 ## Files
