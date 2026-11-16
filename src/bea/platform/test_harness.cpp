@@ -220,6 +220,11 @@ FILE* g_tape = nullptr;
 long g_tape_dx = 0, g_tape_dy = 0, g_tape_wheel = 0;
 int g_tape_buttons = 0, g_tape_last_buttons = 0;
 bool g_tape_moved = false;
+int g_tape_reads = 0, g_tape_split_logs = 0;      // this frame's reads with motion; frames logged
+// each mouse read of the frame (motion, wheel, buttons), for its R lines
+struct TapeRead { long dx, dy, dz; int buttons; };
+TapeRead g_tape_frame_reads[16];
+int g_tape_nreads = 0;
 
 void tape_open()
 {
@@ -264,7 +269,9 @@ void tape_mouse(DWORD size, const void* data)
     const LONG* v = static_cast<const LONG*>(data);
     const unsigned char* b = static_cast<const unsigned char*>(data) + 12;
     g_tape_dx += v[0]; g_tape_dy += v[1]; g_tape_wheel += v[2];
+    if (v[0] || v[1] || v[2]) ++g_tape_reads;
     g_tape_buttons = ((b[0] & 0x80) ? 1 : 0) | ((b[1] & 0x80) ? 2 : 0) | ((b[2] & 0x80) ? 4 : 0);
+    if (g_tape_nreads < 16) g_tape_frame_reads[g_tape_nreads++] = { v[0], v[1], v[2], g_tape_buttons };
     g_tape_moved = true;
 }
 
@@ -276,6 +283,23 @@ void tape_frame(long frame)
         fprintf(g_tape, "M %ld %ld %ld %ld %d\n", frame, g_tape_dx, g_tape_dy, g_tape_wheel, g_tape_buttons);
         g_tape_last_buttons = g_tape_buttons;
     }
+    // the port gives a frame's motion to its first read: a frame whose motion came in several
+    // reads here is not the same input there
+    if (g_tape_reads > 1 && g_tape_split_logs++ < 40)
+        bea_log("tape: frame %ld: motion in %d mouse reads, summed (%ld %ld)", frame, g_tape_reads, g_tape_dx, g_tape_dy);
+    // R lines: when a read after the frame's first had motion or changed the buttons, the M
+    // line's sum given to the first read is not what the game read, so each read of the
+    // frame gets its own line, in order (a reader that does not know them ignores them)
+    bool split = false;
+    for (int k = 1; k < g_tape_nreads; ++k)
+        if (g_tape_frame_reads[k].dx || g_tape_frame_reads[k].dy || g_tape_frame_reads[k].dz ||
+            g_tape_frame_reads[k].buttons != g_tape_frame_reads[k - 1].buttons) split = true;
+    if (split)
+        for (int k = 0; k < g_tape_nreads; ++k)
+            fprintf(g_tape, "R %ld %ld %ld %ld %d\n", frame, g_tape_frame_reads[k].dx, g_tape_frame_reads[k].dy,
+                    g_tape_frame_reads[k].dz, g_tape_frame_reads[k].buttons);
+    g_tape_reads = 0;
+    g_tape_nreads = 0;
     g_tape_dx = g_tape_dy = g_tape_wheel = 0;
     g_tape_moved = false;
     if ((frame & 63) == 0) fflush(g_tape);
@@ -298,8 +322,10 @@ void probe_hex(long frame, const char* name, const void* p, size_t n)
     fputc('\n', g_probes);
 }
 
+extern "C" void bea_aim_flush();       // BEA_AIMTRACE's records, written at each Present
 void probes_frame(long frame)
 {
+    bea_aim_flush();
     static bool tried = false;
     if (!tried) {
         tried = true;
@@ -310,7 +336,21 @@ void probes_frame(long frame)
             if (g_probes) bea_log("probes: writing %s every %ld frames", p, g_probe_every);
         }
     }
-    if (!g_probes || frame % g_probe_every) return;
+    if (!g_probes) return;
+    {
+        // ELD: END_LEVEL_DATA (0x6728f8, 0x5cc bytes; CGame::FillOutEndLevelData fills it as the
+        // level closes) at the first probe and whenever it changes, as theirs
+        static unsigned char last[0x5cc];
+        static bool seen = false;
+        const void* eld = reinterpret_cast<const void*>(0x006728f8);
+        if (!seen || memcmp(last, eld, sizeof last)) {
+            memcpy(last, eld, sizeof last);
+            seen = true;
+            probe_hex(frame, "ELD", last, sizeof last);
+            fflush(g_probes);
+        }
+    }
+    if (frame % g_probe_every) return;
     const char* em = reinterpret_cast<const char*>(0x00672fc8);
     const char* game = reinterpret_cast<const char*>(0x008a9a98);
     probe_hex(frame, "EVT", em + 0x8, 4);
@@ -318,12 +358,24 @@ void probes_frame(long frame)
     probe_hex(frame, "FT", game + 0x398, 4);
     probe_hex(frame, "SC", game + 0xf4, 4);
     probe_hex(frame, "LVL", game + 0x2a0, 4);
+    probe_hex(frame, "RFN", game + 0x14, 4);       // CGame::mRenderFrameNumber (not in the port's probe set)
+    if (getenv("BEA_PROBE_FRC"))                   // CGame +0x388..+0x3b4: render frame length .. mFraction2
+        probe_hex(frame, "FRC", game + 0x388, 44);
     const char* rng = *reinterpret_cast<const char* const*>(game + 0x304);
     probe_hex(frame, "RNG", rng, 8);
     const char* player = *reinterpret_cast<const char* const*>(game + 0x2a4);
     const char* be = player && !IsBadReadPtr(player + 0x1c, 4) ? *reinterpret_cast<const char* const*>(player + 0x1c) : nullptr;
     probe_hex(frame, "POS", be ? be + 0x1c : nullptr, 12);
     probe_hex(frame, "LIFE", be ? be + 0xf8 : nullptr, 8);
+    // BEA_PROBE_OBJECTS=1: BEO/BEW/BEJ, the whole Battle Engine (0x63c bytes) and its walker
+    // (+0x578, 0x4c bytes) and jet (+0x57c, 0x54 bytes) parts, as their BEA_PORT_PROBE_OBJECTS
+    static int objects = -1;
+    if (objects < 0) { char e[8]; objects = GetEnvironmentVariableA("BEA_PROBE_OBJECTS", e, sizeof e) && e[0] == '1'; }
+    if (objects && be && !IsBadReadPtr(be, 0x63c)) {
+        probe_hex(frame, "BEO", be, 0x63c);
+        if (const char* walker = *reinterpret_cast<const char* const*>(be + 0x578)) probe_hex(frame, "BEW", walker, 0x4c);
+        if (const char* jet = *reinterpret_cast<const char* const*>(be + 0x57c)) probe_hex(frame, "BEJ", jet, 0x54);
+    }
     fflush(g_probes);
 }
 
@@ -353,6 +405,97 @@ void replay_frame(long frame)
     while (g_rep_next1 < g_rep_nmsgs && (g_rep_msgs[g_rep_next1].phase == 0 || g_rep_msgs[g_rep_next1].frame <= frame - g_play0)) {
         const RecMsg& m = g_rep_msgs[g_rep_next1++];
         if (m.phase == 1) replay_post(m);
+    }
+}
+
+// BEA_TAPE_IN=<file> (with the fixed clock): an onslaught-ce tape replayed in the original
+// the way that port's replay.cpp replays it, so the two get the same input (2026-11-06:
+// replayed from its recording, 110r's frame 269 had its mouse motion in two reads; the port
+// gives a frame's motion to its first read, and parted from the original at frame 270).
+// At Present F the tape's frame-F lines go out: K as WM_KEYDOWN/UP with lParam 1 | scan << 16
+// (a key-up also 0xC0000000), W as its window message at the point, which GetCursorPos then
+// answers (client pixels), M's motion added up for the next DirectInput mouse read, which
+// takes all of it (later reads see none), buttons as a level.  C lines are left out, as the
+// retail replay shim leaves them out.  BEA_REPLAY is not read with it.
+// R lines (written by BEA_TAPE_OUT, not part of that port's format): a frame's mouse reads one
+// by one; a frame that has them gives its k-th read the k-th line, and its M line is not used.
+struct TapeEv { long frame; char kind; UINT msg; WPARAM wp; LPARAM lp; long dx, dy, dz; int buttons; };
+TapeEv* g_tin = nullptr;
+long g_tin_n = 0, g_tin_next = 0;
+bool g_tapein = false;
+long g_tin_dx = 0, g_tin_dy = 0, g_tin_dz = 0;
+int g_tin_buttons = 0;
+POINT g_tin_cursor = { 0, 0 };
+TapeEv g_tin_reads[16];
+int g_tin_nreads = 0, g_tin_read = 0;
+long g_tin_rframes = 0;
+
+void load_tape_in(const char* path)
+{
+    FILE* f = fopen(path, "r");
+    if (!f) { bea_log("tape in: cannot open %s", path); return; }
+    long n = 0, skipped = 0;
+    char line[512];
+    while (fgets(line, sizeof line, f)) ++n;
+    g_tin = static_cast<TapeEv*>(calloc(n + 1, sizeof(TapeEv)));
+    rewind(f);
+    static const struct { const char* name; UINT msg; } kinds[] = {
+        { "move", WM_MOUSEMOVE }, { "ldown", WM_LBUTTONDOWN }, { "lup", WM_LBUTTONUP }, { "rdown", WM_RBUTTONDOWN },
+        { "rup", WM_RBUTTONUP }, { "mdown", WM_MBUTTONDOWN }, { "mup", WM_MBUTTONUP }, { "wheel", WM_MOUSEWHEEL } };
+    while (fgets(line, sizeof line, f)) {
+        TapeEv e = {};
+        char word[16];
+        unsigned a, b;
+        int x, y;
+        if (line[0] == 'K' && sscanf(line, "K %ld %15s %x %x", &e.frame, word, &a, &b) == 4) {
+            e.kind = 'K';
+            e.msg = strcmp(word, "down") ? WM_KEYUP : WM_KEYDOWN;
+            e.wp = a;
+            e.lp = 1 | ((LPARAM)(b & 0x1ff) << 16) | (e.msg == WM_KEYUP ? (LPARAM)0xC0000000 : 0);
+        } else if (line[0] == 'M' && sscanf(line, "M %ld %ld %ld %ld %d", &e.frame, &e.dx, &e.dy, &e.dz, &e.buttons) == 5) {
+            e.kind = 'M';
+        } else if (line[0] == 'R' && sscanf(line, "R %ld %ld %ld %ld %d", &e.frame, &e.dx, &e.dy, &e.dz, &e.buttons) == 5) {
+            e.kind = 'R';
+            if (!g_tin_n || g_tin[g_tin_n - 1].kind != 'R' || g_tin[g_tin_n - 1].frame != e.frame) ++g_tin_rframes;
+        } else if (line[0] == 'W' && line[1] == ' ' && sscanf(line, "W %ld %15s %d %d %x", &e.frame, word, &x, &y, &a) == 5) {
+            for (const auto& k : kinds) if (!strcmp(word, k.name)) e.msg = k.msg;
+            if (!e.msg) { ++skipped; continue; }
+            e.kind = 'W';
+            e.wp = a;
+            e.lp = MAKELPARAM(x, y);
+        } else {
+            if (line[0] != '#' && strncmp(line, "W_CLIENT", 8)) ++skipped;
+            continue;
+        }
+        g_tin[g_tin_n++] = e;
+    }
+    fclose(f);
+    g_tapein = true;
+    bea_log("tape in: %s: %ld events, %ld frames with R lines (%ld other lines left out)", path, g_tin_n, g_tin_rframes, skipped);
+}
+
+void tapein_frame(long frame)
+{
+    bool reads = false;
+    for (long k = g_tin_next; k < g_tin_n && g_tin[k].frame <= frame; ++k)
+        if (g_tin[k].frame == frame && g_tin[k].kind == 'R') reads = true;
+    g_tin_nreads = g_tin_read = 0;
+    for (; g_tin_next < g_tin_n && g_tin[g_tin_next].frame <= frame; ++g_tin_next) {
+        const TapeEv& e = g_tin[g_tin_next];
+        if (e.frame < frame) continue;      // before the first Present seen: not deliverable, as theirs
+        if (e.kind == 'R') {
+            if (g_tin_nreads < 16) g_tin_reads[g_tin_nreads++] = e;
+            continue;
+        }
+        if (e.kind == 'M' && reads) continue;
+        if (e.kind == 'M') {
+            g_tin_dx += e.dx; g_tin_dy += e.dy; g_tin_dz += e.dz;
+            g_tin_buttons = e.buttons;
+            continue;
+        }
+        if (!g_game_hwnd) continue;
+        PostMessageA(g_game_hwnd, e.msg, e.wp, e.lp);
+        if (e.kind == 'W' && e.msg != WM_MOUSEWHEEL) g_tin_cursor = POINT{ (short)LOWORD(e.lp), (short)HIWORD(e.lp) };
     }
 }
 
@@ -394,6 +537,14 @@ BOOL WINAPI GetCursorPos_rec(LPPOINT p)
 {
     if (!p) return FALSE;
     long call = InterlockedIncrement(&g_cursor_calls);
+    if (g_tapein) {
+        // the tape's point as it is: in the port's replay the window stands at the screen's
+        // origin (ScreenToClient is patched to match, ScreenToClient_tape).  ShutdownMouse
+        // (0x42d3b0) puts this screen point into the mouse position flight steers by; turned
+        // into the test window's screen position, 200r's tape parted from the port by frame 150
+        *p = g_tin_cursor;
+        return TRUE;
+    }
     if (g_replaying) {
         // the recorded position for this read (client coordinates), the last one after the end
         // the newest recorded read of this phase at or before this one (a phase-1 read
@@ -429,6 +580,10 @@ BOOL WINAPI GetCursorPos_rec(LPPOINT p)
     stack_scrub();
     return r;
 }
+
+// BEA_TAPE_IN: the game's ScreenToClient leaves the point as it is, as the port's does while it
+// replays a tape (the window at the screen's origin)
+BOOL WINAPI ScreenToClient_tape(HWND, LPPOINT p) { return p != nullptr; }
 
 // DirectInput: IDirectInput8::CreateDevice (slot 3) is hooked to find the
 // devices, IDirectInputDevice8::GetDeviceState (slot 9) to record or replay
@@ -501,6 +656,22 @@ HRESULT WINAPI GetDeviceState_hook(void* dev, DWORD size, void* data)
     if (d == g_ndevices) return g_GetDeviceState_orig(dev, size, data);
     d = g_dev_logical[d];
     long call = ++g_dev_calls[d];
+    if (g_tapein) {
+        memset(data, 0, size);
+        if (size == 16 || size == 20) {             // DIMOUSESTATE / DIMOUSESTATE2
+            LONG* v = static_cast<LONG*>(data);
+            unsigned char* b = static_cast<unsigned char*>(data) + 12;
+            if (g_tin_read < g_tin_nreads) {
+                const TapeEv& r = g_tin_reads[g_tin_read++];
+                g_tin_dx += r.dx; g_tin_dy += r.dy; g_tin_dz += r.dz;
+                g_tin_buttons = r.buttons;
+            }
+            v[0] = g_tin_dx; v[1] = g_tin_dy; v[2] = g_tin_dz;
+            b[0] = (g_tin_buttons & 1) ? 0x80 : 0; b[1] = (g_tin_buttons & 2) ? 0x80 : 0; b[2] = (g_tin_buttons & 4) ? 0x80 : 0;
+            g_tin_dx = g_tin_dy = g_tin_dz = 0;
+        }
+        return S_OK;
+    }
     // Before play (loading and the level's opening seconds) the game is given no
     // DirectInput input, while recording and in a replay of such a recording.  Mouse
     // movement then reached play through the game's mouse position and the Battle
@@ -672,14 +843,52 @@ long double fixed_seconds()
     long c = g_own_counts ? ++t_fixed_calls : InterlockedIncrement(&g_fixed_calls);
     return (long double)g_fixed_frames * (long double)g_fixed_step + (long double)c * 1e-7L;
 }
+
+// BEA_CECLOCK=1 (with BEA_FIXEDSTEP): onslaught-ce's replay clock (its BEA_PORT_CLOCK=present,
+// port/platform/common/clock.cpp there) in place of the one above, so the original and the port
+// see the same times from one tape (2026-11-06: under the clock above, 110r's tape in the port
+// parted from the original at frame 300, the frame time 0.8001 against 0.8000 from frame 50).
+// 1,000 s plus the step in whole nanoseconds per Present, a 1 GHz counter; between Presents only
+// the main thread (the first to read it) moves it: 1 ms every 4,096 of its reads since the last
+// Present, and the milliseconds of its Sleep calls.  The file time runs from 2003-03-14 12:00 UTC.
+static bool g_ceclock = false;
+static unsigned long long g_ce_dtns = 0;
+static volatile LONG64 g_ce_esc_ms = 0;
+static volatile LONG g_ce_main = 0;
+static thread_local unsigned t_ce_reads = 0;
+static bool ce_main()
+{
+    InterlockedCompareExchange(&g_ce_main, (LONG)GetCurrentThreadId(), 0);
+    return g_ce_main == (LONG)GetCurrentThreadId();
+}
+static unsigned long long ce_ns()
+{
+    if (ce_main() && ++t_ce_reads % 4096 == 0) InterlockedIncrement64(&g_ce_esc_ms);
+    return 1000000000000ull + (unsigned long long)g_fixed_frames * g_ce_dtns + (unsigned long long)g_ce_esc_ms * 1000000ull;
+}
+static BOOL WINAPI QPF_ce(LARGE_INTEGER* out) { out->QuadPart = 1000000000ll; return TRUE; }
+static void WINAPI Sleep_ce(DWORD ms)
+{
+    if (ce_main()) InterlockedExchangeAdd64(&g_ce_esc_ms, ms);
+    Sleep(ms);
+}
+static void WINAPI GetSystemTimeAsFileTime_ce(LPFILETIME ft)
+{
+    unsigned long long t = 126921456000000000ull + (ce_ns() - 1000000000000ull) / 100;
+    ft->dwLowDateTime = (DWORD)t;
+    ft->dwHighDateTime = (DWORD)(t >> 32);
+}
+
 BOOL WINAPI QPC_fixed(LARGE_INTEGER* out)
 {
+    if (g_ceclock) { out->QuadPart = (LONGLONG)ce_ns(); return TRUE; }
     // never 0: the game spins while the counter reads 0 (fpstimer.cpp)
     out->QuadPart = (LONGLONG)(fixed_seconds() * (long double)g_real_freq) + g_real_freq;
     return TRUE;
 }
 DWORD WINAPI timeGetTime_fixed()
 {
+    if (g_ceclock) return (DWORD)(ce_ns() / 1000000ull);
     return (DWORD)(fixed_seconds() * 1000.0L) + 1000;
 }
 
@@ -1115,8 +1324,10 @@ static bool fpsclock_on()
     static int on = -1;
     if (on < 0) {
         char b[16];
+        // not under BEA_CECLOCK: the port's meter measures its own clock, so the original's does too
         on = GetEnvironmentVariableA("BEA_FIXEDSTEP", b, sizeof b) > 0 &&
-             GetEnvironmentVariableA("BEA_FPSCLOCK", b, sizeof b) && b[0] == '1';
+             GetEnvironmentVariableA("BEA_FPSCLOCK", b, sizeof b) && b[0] == '1' &&
+             !(GetEnvironmentVariableA("BEA_CECLOCK", b, sizeof b) && b[0] == '1');
         if (on) bea_log("harness: the frame-rate meter reports the fixed step (BEA_FPSCLOCK)");
     }
     return on > 0;
@@ -1217,6 +1428,25 @@ extern "C" void bea_trace_call(const char* what, uint32_t a, uint32_t b)
 // The allocator port calls bea_alloc_hook (temporarily, while hunting).
 extern "C" { long g_wa_n = 0, g_wa_count = 0; }
 uint32_t g_wa_abs = 0, g_wa_lines = 0;   // BEA_WATCHABS=<addr>: that address, armed at hook install
+// BEA_WATCHRING=1 (with BEA_WATCHABS): keep the last 64 writes instead of logging each, and log them when
+// bea_watch_ring_dump is called (the first collision test of BEA_COLTRACE): who left a leftover there
+extern uint32_t g_wa_addr;
+struct WaRing { uint32_t eip, value, ebp; unsigned time; char chain[96]; };
+static WaRing g_wa_ring[64];
+static unsigned g_wa_ring_n = 0;
+static int g_wa_ring_on = -1;
+void bea_watch_ring_dump(const char* why)
+{
+    if (g_wa_ring_on != 1) return;
+    g_wa_ring_on = 0;                            // once; the handler then logs nothing more
+    unsigned n = g_wa_ring_n < 64 ? g_wa_ring_n : 64;
+    bea_log("watchring: %s: the last %u of %u writes to %08lx", why, n, g_wa_ring_n, (unsigned long)g_wa_addr);
+    for (unsigned i = g_wa_ring_n - n; i < g_wa_ring_n; ++i) {
+        const WaRing& r = g_wa_ring[i % 64];
+        bea_log("watchring: time %08x eip %08lx = %08lx ebp %08lx <%s", r.time, (unsigned long)r.eip, (unsigned long)r.value,
+                (unsigned long)r.ebp, r.chain);
+    }
+}
 uint32_t g_wa_off = 0, g_wa_addr = 0, g_wf_eip = 0, g_wf_off = 0, g_wa_follow = 0;
 LONG CALLBACK wa_veh(EXCEPTION_POINTERS* ep)
 {
@@ -1259,6 +1489,16 @@ LONG CALLBACK wa_veh(EXCEPTION_POINTERS* ep)
             if (q[-5] != 0xe8 && q[-2] != 0xff && q[-3] != 0xff && q[-6] != 0xff) continue;
             len += snprintf(chain + len, sizeof chain - len, " %06lx", (unsigned long)v);
             ++n;
+        }
+        if (g_wa_ring_on < 0) { char rb[8]; g_wa_ring_on = GetEnvironmentVariableA("BEA_WATCHRING", rb, sizeof rb) && rb[0] == '1'; }
+        if (g_wa_abs && g_wa_ring_on >= 0 && GetEnvironmentVariableA("BEA_WATCHRING", nullptr, 0)) {
+            if (g_wa_ring_on == 1) {
+                WaRing& r = g_wa_ring[g_wa_ring_n++ % 64];
+                r.eip = c->Eip; r.value = *reinterpret_cast<uint32_t*>(g_wa_addr); r.ebp = c->Ebp;
+                memcpy(&r.time, reinterpret_cast<const void*>(0x00672fc8 + 8), 4);
+                snprintf(r.chain, sizeof r.chain, "%s", chain);
+            }
+            return EXCEPTION_CONTINUE_EXECUTION;
         }
         if (g_wa_abs && ++g_wa_lines > 20000) return EXCEPTION_CONTINUE_EXECUTION;
         bea_log("watchalloc: frame %ld eip %08lx [%08lx] = %08lx ebp %08lx <%s", f, (unsigned long)c->Eip, (unsigned long)g_wa_addr,
@@ -1473,9 +1713,18 @@ void install_fixed_clock()
     QueryPerformanceFrequency(&f);
     g_real_freq = f.QuadPart ? f.QuadPart : 1;
     g_fixed_step = step;
+    if (GetEnvironmentVariableA("BEA_CECLOCK", buf, sizeof buf) && buf[0] == '1') {
+        g_ceclock = true;
+        g_ce_dtns = (unsigned long long)(step * 1e9 + 0.5);
+        bool q = patch_import("QueryPerformanceFrequency", reinterpret_cast<void*>(&QPF_ce));
+        bool s = patch_import("Sleep", reinterpret_cast<void*>(&Sleep_ce));
+        bool t = patch_import("GetSystemTimeAsFileTime", reinterpret_cast<void*>(&GetSystemTimeAsFileTime_ce));
+        bea_log("harness: onslaught-ce's present clock, %llu ns per frame (BEA_CECLOCK; qpf=%d sleep=%d filetime=%d)", g_ce_dtns, q, s, t);
+    }
     bool a = patch_import("QueryPerformanceCounter", reinterpret_cast<void*>(&QPC_fixed));
     bool b = patch_import("timeGetTime", reinterpret_cast<void*>(&timeGetTime_fixed));
-    bool c = patch_import("GetCursorPos", g_recording || g_replaying ? reinterpret_cast<void*>(&GetCursorPos_rec) : reinterpret_cast<void*>(&GetCursorPos_fixed));
+    if (g_tapein) bea_log("tape in: ScreenToClient patched %d", patch_import("ScreenToClient", reinterpret_cast<void*>(&ScreenToClient_tape)));
+    bool c = patch_import("GetCursorPos", g_recording || g_replaying || g_tapein ? reinterpret_cast<void*>(&GetCursorPos_rec) : reinterpret_cast<void*>(&GetCursorPos_fixed));
     install_rand_trace();
     bea_log("harness: fixed clock %g s per frame (imports patched: qpc=%d timeGetTime=%d cursor=%d)", step, a, b, c);
     if (g_recording || g_replaying) {
@@ -1627,6 +1876,7 @@ HRESULT WINAPI Present_hook(void* dev, const RECT* src, const RECT* dst, HWND wn
         __asm__ volatile("fldcw %0" : : "m"(cw));
     }
     long frame = InterlockedIncrement(&g_fixed_frames);
+    t_ce_reads = 0;
     // the frame being presented is the one counted before this increment
     long shot_at = g_shot_play ? (g_play0 >= 0 ? frame - 1 - g_play0 : -1) : frame - 1;
     while (g_next_shot_frame < g_nshot_frames && shot_at >= 0 && g_shot_frames[g_next_shot_frame] <= shot_at)
@@ -1649,7 +1899,7 @@ HRESULT WINAPI Present_hook(void* dev, const RECT* src, const RECT* dst, HWND wn
         char tb[16];
         trace_play = GetEnvironmentVariableA("BEA_INPUTSYNC", tb, sizeof tb) > 0 || GetEnvironmentVariableA("BEA_RANDTRACE", tb, sizeof tb) > 0;
     }
-    if (g_play0 < 0 && (g_recording || g_replaying || trace_play) && *reinterpret_cast<volatile int*>(0x008a9ac0) == 3) play_started(frame);
+    if (g_play0 < 0 && (g_recording || g_replaying || g_tapein || trace_play) && *reinterpret_cast<volatile int*>(0x008a9ac0) == 3) play_started(frame);
     // input-read counts, to line a replay up with its recording (level 500, 2026-10-27:
     // ~1.3 mouse reads per frame, a replay that drifts from the playthrough)
     // (BEA_INPUTSYNC=N set: every N play frames in any run, an AI-only one included)
@@ -1684,6 +1934,7 @@ HRESULT WINAPI Present_hook(void* dev, const RECT* src, const RECT* dst, HWND wn
         peek_log(frame - g_play0);
     }
     probes_frame(frame);
+    if (g_tapein) tapein_frame(frame);
     if (g_replaying) {
         tape_open();
         tape_frame(frame - 1);
@@ -2376,6 +2627,841 @@ static void install_videoclock()
     bea_log("harness: BEA_VIDEOCLOCK - %d of 3 Bink calls hooked", n);
 }
 
+// BEA_EVTRACE=<file>: each event CEventManager::Flush (0x44b640) hands to its receiver, up to
+// BEA_EVTRACE_MAX (10) seconds of event-manager time: `EV <manager time> <event number> <event
+// time> <receiver's class>` (times as float bits, the class from the MSVC type information),
+// the line a traced onslaught-ce build writes, to find the first event the two differ on
+// (2026-11-07: level 720's pre-run processed 4 fewer events in the port by frame 3).  The two
+// HandleEvent calls (0x44b687 buffers, 0x44b6ef overflow: load the vtable, push the event,
+// call slot 0) jump to stubs that log and make the same call.
+static FILE* g_evtrace = nullptr;
+static unsigned g_evtrace_max = 0x41200000;     // 10.0f; times are positive, so their bits order like them
+extern "C" void __cdecl bea_evtrace_log(const void* to, const unsigned char* ev)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fc8 + 8), 4);
+    if (now > g_evtrace_max) {
+        static bool flushed = false;            // runs end in ExitProcess, which leaves the buffer unwritten
+        if (!flushed) { flushed = true; fflush(g_evtrace); }
+        return;
+    }
+    const char* name = "?";
+    const void* const* vt = *static_cast<const void* const* const*>(to);
+    const unsigned char* col = !IsBadReadPtr(vt - 1, 4) ? static_cast<const unsigned char*>(vt[-1]) : nullptr;
+    if (col && !IsBadReadPtr(col + 12, 4)) {
+        const char* td = *reinterpret_cast<const char* const*>(col + 12);
+        if (td && !IsBadReadPtr(td + 8, 4)) name = td + 8;
+    }
+    unsigned t;
+    memcpy(&t, ev + 0x10, 4);
+    unsigned long count;                        // events processed before this one (the manager's +0xc)
+    memcpy(&count, reinterpret_cast<const void*>(0x00672fc8 + 0xc), 4);
+    fprintf(g_evtrace, "EV %08x %d %08x %s %lu\n", now, (int)*reinterpret_cast<const short*>(ev + 4), t, name, count);
+}
+extern "C" void bea_evtrace_stub1();
+extern "C" void bea_evtrace_stub2();
+__asm__(".text\n"
+        ".globl _bea_evtrace_stub1\n_bea_evtrace_stub1:\n"
+        "\tpushal\n\tpushfl\n\tpushl %eax\n\tpushl %ecx\n\tcall _bea_evtrace_log\n\taddl $8, %esp\n\tpopfl\n\tpopal\n"
+        "\tmovl (%ecx), %edx\n\tpushl %eax\n\tcall *(%edx)\n\tpushl $0x0044b68c\n\tret\n"
+        ".globl _bea_evtrace_stub2\n_bea_evtrace_stub2:\n"
+        "\tpushal\n\tpushfl\n\tpushl %edx\n\tpushl %ecx\n\tcall _bea_evtrace_log\n\taddl $8, %esp\n\tpopfl\n\tpopal\n"
+        "\tmovl (%ecx), %eax\n\tpushl %edx\n\tcall *(%eax)\n\tpushl $0x0044b6f4\n\tret\n");
+// BEA_CCTRACE=<file>: each CHLCollisionDetector::ScheduleCollisionCheck (0x480ed0) logs its inputs up to
+// BEA_EVTRACE_MAX seconds, as a traced onslaught-ce build does: `CC <class> <other's class>` and the
+// manager time, both centres (GetCentrePos 0x4f3ac0), both radii (+0x1c), both top speeds
+// (GetMaxVelocity, slot 15) as float bits, then the time it schedules (0: not computed here).
+// 2026-11-07: level 720's pre-run scheduled a ground vehicles' check 0.0013 s earlier in the port.
+static FILE* g_cctrace = nullptr;
+typedef void (__attribute__((thiscall)) *SchedCC_t)(void*, void*);
+static SchedCC_t g_schedcc_orig = nullptr;
+static const char* rtti_name(const void* obj)
+{
+    const void* const* vt = *static_cast<const void* const* const*>(obj);
+    if (IsBadReadPtr(vt - 1, 4)) return "?";
+    const unsigned char* col = static_cast<const unsigned char*>(vt[-1]);
+    if (!col || IsBadReadPtr(col + 12, 4)) return "?";
+    const char* td = *reinterpret_cast<const char* const*>(col + 12);
+    return td && !IsBadReadPtr(td + 8, 4) ? td + 8 : "?";
+}
+static void __attribute__((thiscall)) schedcc_hook(void* self, void* other)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fc8 + 8), 4);
+    if (g_cctrace && now <= g_evtrace_max) {
+        typedef void (__attribute__((thiscall)) *Centre_t)(void*, float*);
+        typedef float (__attribute__((thiscall)) *Speed_t)(void*);
+        char* mine = *reinterpret_cast<char**>(static_cast<char*>(self) + 8);
+        void* thing = *reinterpret_cast<void**>(mine + 8);
+        void* othing = *reinterpret_cast<void**>(static_cast<char*>(other) + 8);
+        float c[4], o[4], v[12];
+        reinterpret_cast<Centre_t>(0x004f3ac0)(othing, o);
+        reinterpret_cast<Centre_t>(0x004f3ac0)(thing, c);
+        float s2 = reinterpret_cast<Speed_t>((*reinterpret_cast<void***>(othing))[15])(othing);
+        float s1 = reinterpret_cast<Speed_t>((*reinterpret_cast<void***>(thing))[15])(thing);
+        memcpy(&v[0], &now, 4);
+        v[1] = c[0]; v[2] = c[1]; v[3] = c[2]; v[4] = o[0]; v[5] = o[1]; v[6] = o[2];
+        memcpy(&v[7], mine + 0x1c, 4);
+        memcpy(&v[8], static_cast<char*>(other) + 0x1c, 4);
+        v[9] = s1; v[10] = s2; v[11] = 0;
+        unsigned u[12];
+        memcpy(u, v, sizeof u);
+        fprintf(g_cctrace, "CC %s %s", rtti_name(thing), rtti_name(othing));
+        for (unsigned x : u) fprintf(g_cctrace, " %08x", x);
+        fputc('\n', g_cctrace);
+    } else if (g_cctrace) {
+        fflush(g_cctrace);
+    }
+    g_schedcc_orig(self, other);
+}
+
+// BEA_GVTRACE=<file>: each CGroundVehicle::Move (0x47d1c0) logs the object's bytes +0x1c..+0x13c (position to
+// orientations) at entry (0) and exit (1) with its thing number (+0x2e), up to BEA_EVTRACE_MAX seconds, as a
+// traced onslaught-ce build does (`GV <manager time> <number> <phase> <hex>`).
+static FILE* g_gvtrace = nullptr;
+typedef void (__attribute__((thiscall)) *GvMove_t)(void*);
+static GvMove_t g_gvmove_orig = nullptr;
+static void gv_log(const void* self, int phase)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fc8 + 8), 4);
+    if (now > g_evtrace_max) { fflush(g_gvtrace); return; }
+    fprintf(g_gvtrace, "GV %08x %d %d ", now, (int)*reinterpret_cast<const short*>(static_cast<const char*>(self) + 0x2e), phase);
+    const unsigned char* b = static_cast<const unsigned char*>(self) + 0x1c;
+    for (int k = 0; k < 0x120; ++k) fprintf(g_gvtrace, "%02x", b[k]);
+    fputc('\n', g_gvtrace);
+}
+static void __attribute__((thiscall)) gvmove_hook(void* self)
+{
+    gv_log(self, 0);
+    g_gvmove_orig(self);
+    gv_log(self, 1);
+}
+
+// BEA_HITTRACE=<file>: each CUnit::Hit (0x4fcc30) with a collision report logs the event time, the unit's thing
+// number, the contact count (+0x80) and normals 0..2 (+0x08, 16 bytes apart) as float bits, up to
+// BEA_EVTRACE_MAX seconds, as a traced onslaught-ce build does (`HIT ...`). Hit adds normals 1 and 2 whatever
+// the count, so with two contacts normal 2 is whatever the stack held.
+static FILE* g_hittrace = nullptr;
+typedef void (__attribute__((thiscall)) *UnitHit_t)(void*, void*, void*);
+static UnitHit_t g_unithit_orig = nullptr;
+static void __attribute__((thiscall)) unithit_hook(void* self, void* other, void* report)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fc8 + 8), 4);
+    if (report && now <= g_evtrace_max) {
+        const unsigned char* r = static_cast<const unsigned char*>(report);
+        fprintf(g_hittrace, "HIT %08x %d %d", now, (int)*reinterpret_cast<const short*>(static_cast<const char*>(self) + 0x2e),
+                *reinterpret_cast<const int*>(r + 0x80));
+        for (int k = 0; k < 3; ++k)
+            for (int c = 0; c < 3; ++c) fprintf(g_hittrace, " %08x", *reinterpret_cast<const unsigned*>(r + 8 + 16 * k + 4 * c));
+        fputc('\n', g_hittrace);
+    } else if (now > g_evtrace_max) {
+        fflush(g_hittrace);
+    }
+    g_unithit_orig(self, other, report);
+}
+
+// BEA_COLTRACE=<file>: CCollisionSeekingThing::Unknown6 (0x4264a0) tests a pair through the volume's Collide
+// (0x4267cb, call slot 5) into a report on its own stack (esp + 0x74). The call site jumps to a stub that logs the
+// report before (what the stack held: Hit reads normal 2 even with two contacts) and after, and makes the same
+// call at the same stack depth, so the frame it reads is not moved: `COL <time> <0 before|1 after> <report
+// address> <result> <thing number> <contacts> <normals 0..2 as float bits>`.
+static FILE* g_coltrace = nullptr;
+extern "C" void __cdecl bea_col_log(int phase, const unsigned char* report, int result, const unsigned char* cs)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fc8 + 8), 4);
+    if (now > g_evtrace_max) { fflush(g_coltrace); return; }
+    if (phase == 0) bea_watch_ring_dump("first collision test");
+    const char* thing = cs ? *reinterpret_cast<const char* const*>(cs + 8) : nullptr;
+    fprintf(g_coltrace, "COL %08x %d %p %d %d %d", now, phase, report, result,
+            thing ? (int)*reinterpret_cast<const short*>(thing + 0x2e) : -1, *reinterpret_cast<const int*>(report + 0x80));
+    for (int k = 0; k < 3; ++k)
+        for (int c = 0; c < 3; ++c) fprintf(g_coltrace, " %08x", *reinterpret_cast<const unsigned*>(report + 8 + 16 * k + 4 * c));
+    fputc('\n', g_coltrace);
+}
+extern "C" void bea_col_stub();
+__asm__(".text\n"
+        ".globl _bea_col_stub\n_bea_col_stub:\n"
+        // before: the four arguments are pushed, so the report is at esp + 16 + 0x74
+        "\tpushal\n\tpushfl\n"
+        "\tpushl %ebp\n\tpushl $0\n\tleal 44+16+0x74(%esp), %eax\n\tpushl %eax\n\tpushl $0\n"
+        "\tcall _bea_col_log\n\taddl $16, %esp\n\tpopfl\n\tpopal\n"
+        "\tcall *0x14(%edx)\n"
+        // after: the callee popped its arguments; the report is at esp + 0x74
+        "\tpushl %eax\n\tpushal\n\tpushfl\n"
+        "\tpushl %ebp\n\tpushl 40(%esp)\n\tleal 48+0x74(%esp), %ecx\n\tpushl %ecx\n\tpushl $1\n"
+        "\tcall _bea_col_log\n\taddl $16, %esp\n\tpopfl\n\tpopal\n\tpopl %eax\n"
+        "\tcmpl %ebx, %eax\n\tpushl $0x004267d0\n\tret\n");
+
+// BEA_RDTRACE=<file>: CRound::Init (0x4d8410, at its end: phase 2) and each CRound::Move (0x4d8e40, entry 0 and exit
+// 1) log the round's bytes +0x1c..+0x13c and thing number between BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds, as a
+// traced onslaught-ce build does (`RD <time> <number> <phase> <hex>`).
+static FILE* g_rdtrace = nullptr;
+static unsigned g_rd_lo = 0, g_rd_hi = 0x41200000;
+typedef void (__attribute__((thiscall)) *RdInit_t)(void*, void*);
+typedef void (__attribute__((thiscall)) *RdMove_t)(void*);
+static RdInit_t g_rdinit_orig = nullptr;
+static RdMove_t g_rdmove_orig = nullptr;
+static void rd_log(const void* self, int phase)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fc8 + 8), 4);
+    if (now > g_rd_hi) { fflush(g_rdtrace); return; }
+    if (now < g_rd_lo) return;
+    unsigned short cw;                          // the x87 control word, in the phase's high bits
+    __asm__ volatile("fnstcw %0" : "=m"(cw));
+    fprintf(g_rdtrace, "RD %08x %d %d ", now, (int)*reinterpret_cast<const short*>(static_cast<const char*>(self) + 0x2e), phase | (cw << 8));
+    const unsigned char* b = static_cast<const unsigned char*>(self) + 0x1c;
+    for (int k = 0; k < 0x120; ++k) fprintf(g_rdtrace, "%02x", b[k]);
+    fputc('\n', g_rdtrace);
+}
+static void __attribute__((thiscall)) rdinit_hook(void* self, void* init) { g_rdinit_orig(self, init); rd_log(self, 2); }
+static void __attribute__((thiscall)) rdmove_hook(void* self) { rd_log(self, 0); g_rdmove_orig(self); rd_log(self, 1); }
+
+// BEA_AIMTRACE=<file>: CBattleEngine::UpdateAutoAim's two pitch arcsines (call __CIasin at 0x40b3e3 and 0x40b5b6)
+// jump to stubs that record the event time, the site, the aim vector (esp+0x44..0x4c), its length (esp+0xc) and the
+// arcsine's 80-bit input and output, then make the same call at the same stack depth. The stubs only move memory (no
+// C calls while the x87 state is live); the records are written out at each Present:
+// `AIM <time> <site> <x> <y> <z> <length> <input 80-bit hex> <output 80-bit hex>`. Level 110 recorded with
+// onslaught-ce (2026-11-10): the auto-aim pitch differed by one ulp at frame 462 first.
+extern "C" {
+unsigned char g_aim_ring[4096 * 48];
+volatile unsigned g_aim_n = 0;
+unsigned char* g_aim_cur = nullptr;
+unsigned g_aim_eax = 0, g_aim_ecx = 0;
+unsigned g_aim_asin = 0x0055dcb0;
+}
+static FILE* g_aimtrace = nullptr;
+static unsigned g_aim_written = 0;
+#define BEA_AIM_STUB(NAME, SITE, BACK) \
+    ".globl _" NAME "\n_" NAME ":\n" \
+    "\tmovl %eax, _g_aim_eax\n\tmovl %ecx, _g_aim_ecx\n" \
+    "\tmovl _g_aim_n, %eax\n\tcmpl $4096, %eax\n\tjae 8f\n" \
+    "\timull $48, %eax, %eax\n\taddl $_g_aim_ring, %eax\n\tmovl %eax, _g_aim_cur\n" \
+    "\tmovl 0x00672fd0, %ecx\n\tmovl %ecx, 0(%eax)\n\tmovl $" SITE ", 4(%eax)\n" \
+    "\tmovl 0x44(%esp), %ecx\n\tmovl %ecx, 8(%eax)\n\tmovl 0x48(%esp), %ecx\n\tmovl %ecx, 12(%eax)\n" \
+    "\tmovl 0x4c(%esp), %ecx\n\tmovl %ecx, 16(%eax)\n\tmovl 0x0c(%esp), %ecx\n\tmovl %ecx, 20(%eax)\n" \
+    "\tfld %st(0)\n\tfstpt 24(%eax)\n" \
+    "\tmovl _g_aim_ecx, %ecx\n\tmovl _g_aim_eax, %eax\n" \
+    "\tcall *_g_aim_asin\n" \
+    "\tmovl %eax, _g_aim_eax\n\tmovl _g_aim_cur, %eax\n\tfld %st(0)\n\tfstpt 34(%eax)\n" \
+    "\tincl _g_aim_n\n\tmovl _g_aim_eax, %eax\n\tpushl $" BACK "\n\tret\n" \
+    "8:\tmovl _g_aim_ecx, %ecx\n\tmovl _g_aim_eax, %eax\n\tcall *_g_aim_asin\n\tpushl $" BACK "\n\tret\n"
+extern "C" void bea_aim_stub1();
+extern "C" void bea_aim_stub2();
+__asm__(".text\n" BEA_AIM_STUB("bea_aim_stub1", "0x0040b3e3", "0x0040b3e8") BEA_AIM_STUB("bea_aim_stub2", "0x0040b5b6", "0x0040b5bb"));
+// called at each Present (probes_frame): the records made since the last call
+extern "C" void bea_aim_flush()
+{
+    if (!g_aimtrace) return;
+    unsigned n = g_aim_n;
+    for (; g_aim_written < n; ++g_aim_written) {
+        const unsigned char* r = g_aim_ring + 48 * g_aim_written;
+        unsigned u[6];
+        memcpy(u, r, sizeof u);
+        fprintf(g_aimtrace, "AIM %08x %06x %08x %08x %08x %08x ", u[0], u[1], u[2], u[3], u[4], u[5]);
+        for (int k = 9; k >= 0; --k) fprintf(g_aimtrace, "%02x", r[24 + k]);
+        fputc(' ', g_aimtrace);
+        for (int k = 9; k >= 0; --k) fprintf(g_aimtrace, "%02x", r[34 + k]);
+        fputc('\n', g_aimtrace);
+    }
+    fflush(g_aimtrace);
+}
+
+// BEA_PITCHTRACE=<file>: CBattleEngineWalkerPart::Pitch (0x4136e0, thiscall, float vy) logs the event time, vy, the
+// main part's zoom (+0x2c8) and pitch velocity (+0x280) before and after:
+// `PITCH <time> <vy> <zoom> <before> <after>` (float bits). Level 110 recorded with onslaught-ce (2026-11-10): with
+// the auto-aim fixed, the pitch velocity parted first at frame 2199, a tick whose mouse moved one count up.
+static FILE* g_pitchtrace = nullptr;
+typedef void (__attribute__((thiscall)) *WalkerPitch_t)(void*, float);
+static WalkerPitch_t g_wpitch_orig = nullptr;
+static void __attribute__((thiscall)) wpitch_hook(void* self, float vy)
+{
+    char* mainpart = *reinterpret_cast<char**>(static_cast<char*>(self) + 0x20);
+    unsigned t, v, z, b, a;
+    memcpy(&t, reinterpret_cast<const void*>(0x00672fd0), 4);
+    memcpy(&v, &vy, 4);
+    memcpy(&z, mainpart + 0x2c8, 4);
+    memcpy(&b, mainpart + 0x280, 4);
+    g_wpitch_orig(self, vy);
+    memcpy(&a, mainpart + 0x280, 4);
+    fprintf(g_pitchtrace, "PITCH %08x %08x %08x %08x %08x\n", t, v, z, b, a);
+}
+
+// BEA_MLTRACE=<file>: CMeshCollisionVolume::CollideWithLine (0x4ad830, thiscall: a, move, line, report) between
+// BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds logs the event time, move->mPos, line->mStart, line->mEnd, the result,
+// report->mContactPos, mDistance and mTriangleNormal: `ML <time> <hit> <13 floats>` (float bits), as a traced
+// onslaught-ce build does. Level 110 recorded with onslaught-ce (2026-11-10): after the auto-aim and ground-pitch
+// fixes, the crosshair line's distance parted at frame 3075 and the step-up line's at 3129.
+static FILE* g_mltrace = nullptr;
+typedef int (__attribute__((thiscall)) *MeshLine_t)(void*, void*, void*, void*, void*);
+static MeshLine_t g_meshline_orig = nullptr;
+static int __attribute__((thiscall)) meshline_hook(void* self, void* a, void* move, void* line, void* report)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    void* caller = __builtin_return_address(0);
+    int hit = g_meshline_orig(self, a, move, line, report);
+    if (now > g_rd_hi) { fflush(g_mltrace); return hit; }
+    if (now < g_rd_lo) return hit;
+    unsigned u[16];
+    memcpy(&u[0], static_cast<char*>(move) + 16, 12);
+    memcpy(&u[3], static_cast<char*>(line) + 20, 12);
+    memcpy(&u[6], static_cast<char*>(line) + 36, 12);
+    memcpy(&u[9], static_cast<char*>(report) + 132, 12);
+    memcpy(&u[12], static_cast<char*>(report) + 196, 4);
+    memcpy(&u[13], static_cast<char*>(report) + 212, 12);
+    fprintf(g_mltrace, "ML %08x %d", now, hit);
+    for (int k = 0; k < 16; ++k) fprintf(g_mltrace, " %08x", u[k]);
+    fprintf(g_mltrace, " @%p\n", caller);
+    return hit;
+}
+
+// BEA_EMTRACE=<file>: CRTMesh::GetRTEmitter (0x4dd160, thiscall: name, index, pos&, ori&, a, b) between
+// BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds logs the event time, the name's first 4 bytes, the index, the output
+// position, the part's cached pose position (rt->mPose->mPositions[part]), the thing's render position and render
+// orientation: `EM <time> <name> <index> <3+3+3+9 floats>` (float bits), as a traced onslaught-ce build does. Level
+// 110 recorded with onslaught-ce (2026-11-10): the second gun's round started 1 ulp lower in Z at 46.55 s.
+static FILE* g_emtrace = nullptr;
+typedef void (__attribute__((thiscall)) *RtEmitter_t)(void*, const char*, int, float*, float*, int, int);
+typedef void* (__attribute__((thiscall)) *EmitterSubpart_t)(void*, const char*, int);
+typedef void* (__attribute__((thiscall)) *RenderVec_t)(void*, void*);
+static RtEmitter_t g_rtemitter_orig = nullptr;
+static void __attribute__((thiscall)) rtemitter_hook(void* self, const char* name, int index, float* pos, float* ori, int a, int b)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    g_rtemitter_orig(self, name, index, pos, ori, a, b);
+    if (now > g_rd_hi) { fflush(g_emtrace); return; }
+    if (now < g_rd_lo) return;
+    char* rt = static_cast<char*>(self);
+    void* mesh = *reinterpret_cast<void**>(rt + 0x14);
+    void* thing = *reinterpret_cast<void**>(rt + 8);
+    char* pose = *reinterpret_cast<char**>(rt + 0xc);
+    unsigned u[18] = {};
+    memcpy(&u[0], pos, 12);
+    if (mesh && pose) {
+        char* part = static_cast<char*>(reinterpret_cast<EmitterSubpart_t>(0x004aa820)(mesh, name, index));
+        if (part) {
+            int n = *reinterpret_cast<int*>(part + 0x88);
+            memcpy(&u[3], *reinterpret_cast<char**>(pose + 4) + n * 16, 12);
+        }
+    }
+    if (thing) {
+        void** vt = *reinterpret_cast<void***>(thing);
+        float rp[4], ro[12];
+        reinterpret_cast<RenderVec_t>(vt[0])(thing, rp);
+        reinterpret_cast<RenderVec_t>(vt[1])(thing, ro);
+        memcpy(&u[6], rp, 12);
+        memcpy(&u[9], &ro[0], 12);
+        memcpy(&u[12], &ro[4], 12);
+        memcpy(&u[15], &ro[8], 12);
+    }
+    unsigned nm = 0;
+    strncpy(reinterpret_cast<char*>(&nm), name, 4);
+    fprintf(g_emtrace, "EM %08x %08x %d", now, nm, index);
+    for (int k = 0; k < 18; ++k) fprintf(g_emtrace, " %08x", u[k]);
+    fputc('\n', g_emtrace);
+}
+
+// BEA_PTTRACE=<file>: CMeshCollisionVolume::CachePartTransform (0x4ad600, thiscall: mesh, part, frame) between
+// BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds logs the event time, the part, mUnknown1C, the cached transform
+// (mOrientation, mPos), the render thing's cached pose for the part (position, orientation) and its thing's render
+// position and orientation: `PT <time> <part> <1C> <9+3+3+9+3+9 floats>` (float bits), as a traced onslaught-ce build
+// does. Level 110 recorded with onslaught-ce (2026-11-10): the crosshair line's contact parted at 54.25 s with the
+// same line and triangle.
+static FILE* g_pttrace = nullptr;
+typedef void (__attribute__((thiscall)) *CachePart_t)(void*, void*, int, float);
+static CachePart_t g_cachepart_orig = nullptr;
+static void __attribute__((thiscall)) cachepart_hook(void* self, void* mesh, int part, float frame)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    g_cachepart_orig(self, mesh, part, frame);
+    if (now > g_rd_hi) { fflush(g_pttrace); return; }
+    if (now < g_rd_lo) return;
+    char* v = static_cast<char*>(self);
+    char* rt = *reinterpret_cast<char**>(v + 0x14);
+    char* t = *reinterpret_cast<char**>(v + 0x24) + part * 0x74;
+    unsigned u[36] = {};
+    memcpy(&u[0], t, 12); memcpy(&u[3], t + 16, 12); memcpy(&u[6], t + 32, 12);
+    memcpy(&u[9], t + 96, 12);
+    if (rt) {
+        char* pose = *reinterpret_cast<char**>(rt + 0xc);
+        void* thing = *reinterpret_cast<void**>(rt + 8);
+        if (pose) {
+            char* pp = *reinterpret_cast<char**>(pose + 4) + part * 16;
+            char* po = *reinterpret_cast<char**>(pose) + part * 48;
+            memcpy(&u[12], pp, 12);
+            memcpy(&u[15], po, 12); memcpy(&u[18], po + 16, 12); memcpy(&u[21], po + 32, 12);
+        }
+        if (thing) {
+            void** vt = *reinterpret_cast<void***>(thing);
+            float rp[4], ro[12];
+            reinterpret_cast<RenderVec_t>(vt[0])(thing, rp);
+            reinterpret_cast<RenderVec_t>(vt[1])(thing, ro);
+            memcpy(&u[24], rp, 12);
+            memcpy(&u[27], &ro[0], 12); memcpy(&u[30], &ro[4], 12); memcpy(&u[33], &ro[8], 12);
+        }
+    }
+    fprintf(g_pttrace, "PT %08x %d %d", now, part, *reinterpret_cast<int*>(v + 0x1c));
+    for (int k = 0; k < 36; ++k) fprintf(g_pttrace, " %08x", u[k]);
+    void* th = rt ? *reinterpret_cast<void**>(rt + 8) : nullptr;
+    if (th) {   // the actor's raw mOrientation (+0x3c), mOldOrientation (+0x9c), mCurrentOrientation (+0x114)
+        const char* base = static_cast<const char*>(th) - 8;
+        const unsigned* o = reinterpret_cast<const unsigned*>(base);
+        for (int k : {0x3c, 0x40, 0x44, 0x4c, 0x50, 0x54, 0x5c, 0x60, 0x64, 0x9c, 0xa0, 0xa4, 0xac, 0xb0, 0xb4, 0xbc, 0xc0, 0xc4, 0x114, 0x118, 0x11c})
+            fprintf(g_pttrace, " %08x", o[k / 4]);
+    }
+    fprintf(g_pttrace, " vt%p\n", th ? *reinterpret_cast<void**>(th) : nullptr);
+}
+
+// BEA_ATTRACE=<file>: CMeshPart::EvaluateAnimatedTransform (0x4b5330, cdecl: thing, pos*, ori*, part, parent**,
+// frame*) called from CMeshPose::Build (0x4b4ba0..0x4b4cc1), between BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds: the
+// event time, the part number, the frame in and out, pos and ori in and out:
+// `AT <time> <part> <frame in> <frame out> <3+9+3+9 floats>` (float bits), as a traced onslaught-ce build does.
+static FILE* g_attrace = nullptr;
+typedef void (*AnimXform_t)(void*, float*, float*, char*, void*, int*);
+static AnimXform_t g_animxform_orig = nullptr;
+static void animxform_hook(void* thing, float* pos, float* ori, char* part, void* parent, int* frame)
+{
+    uintptr_t ra = reinterpret_cast<uintptr_t>(__builtin_return_address(0));
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    bool on = g_attrace && ra >= 0x004b4ba0 && ra < 0x004b4cc1 && now >= g_rd_lo && now <= g_rd_hi;
+    unsigned u[24];
+    int fin = frame ? *frame : 0;
+    if (on) { memcpy(&u[0], pos, 12); memcpy(&u[3], ori, 12); memcpy(&u[6], ori + 4, 12); memcpy(&u[9], ori + 8, 12); }
+    g_animxform_orig(thing, pos, ori, part, parent, frame);
+    if (g_attrace && now > g_rd_hi) fflush(g_attrace);
+    if (!on) return;
+    memcpy(&u[12], pos, 12); memcpy(&u[15], ori, 12); memcpy(&u[18], ori + 4, 12); memcpy(&u[21], ori + 8, 12);
+    fprintf(g_attrace, "AT %08x %d %d %d", now, *reinterpret_cast<int*>(part + 0x88), fin, frame ? *frame : 0);
+    for (int k = 0; k < 24; ++k) fprintf(g_attrace, " %08x", u[k]);
+    fprintf(g_attrace, " vt%p\n", thing ? *reinterpret_cast<void**>(thing) : nullptr);
+}
+
+// BEA_GPTRACE=<file>: CMCGroundVehicle::GetPartTransform (0x496ac0, thiscall: part, pos*, ori*, world) between
+// BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds: the event time, the part number and name's first 4 bytes, the unit's
+// fraction time (0x401b50), mUnknownE0/E4/E8/F0/F4, its orientation (+0x3c), ori in and out:
+// `GP <time> <part> <name> <1+5+9+9+9 floats>` (float bits), as a traced onslaught-ce build does.
+static FILE* g_gptrace = nullptr;
+typedef void (__attribute__((thiscall)) *GvPart_t)(void*, char*, float*, float*, int);
+typedef float (__attribute__((thiscall)) *FracTime_t)(void*);
+static GvPart_t g_gvpart_orig = nullptr;
+static void __attribute__((thiscall)) gvpart_hook(void* self, char* part, float* pos, float* ori, int world)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    bool on = now >= g_rd_lo && now <= g_rd_hi;
+    unsigned u[33];
+    if (on) memcpy(&u[15], ori, 12), memcpy(&u[18], ori + 4, 12), memcpy(&u[21], ori + 8, 12);
+    g_gvpart_orig(self, part, pos, ori, world);
+    if (now > g_rd_hi) { fflush(g_gptrace); return; }
+    if (!on) return;
+    char* unit = *reinterpret_cast<char**>(static_cast<char*>(self) + 8) - 8;
+    float frac = reinterpret_cast<FracTime_t>(0x00401b50)(unit);
+    memcpy(&u[0], &frac, 4);
+    memcpy(&u[1], unit + 0xe0, 12);
+    memcpy(&u[4], unit + 0xf0, 8);
+    memcpy(&u[6], unit + 0x3c, 12); memcpy(&u[9], unit + 0x4c, 12); memcpy(&u[12], unit + 0x5c, 12);
+    memcpy(&u[24], ori, 12); memcpy(&u[27], ori + 4, 12); memcpy(&u[30], ori + 8, 12);
+    unsigned nm = 0;
+    memcpy(&nm, part + 220, 4);
+    fprintf(g_gptrace, "GP %08x %d %08x", now, *reinterpret_cast<int*>(part + 0x88), nm);
+    for (int k = 0; k < 33; ++k) fprintf(g_gptrace, " %08x", u[k]);
+    fputc('\n', g_gptrace);
+}
+
+// BEA_UMTRACE=<file>: between BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds, CUnit::Move (0x4fa8d0) logs the event
+// time, the thing number (+0x2e), mUnknownE0/E4/E8/EC/F0/F4 before and after (`UM ...`), and
+// CWeapon::CalculateDesiredPitch (0x5094b0, thiscall: FVector target by value) the target and the result rounded to a
+// float (`CD ...`), as a traced onslaught-ce build does.
+static FILE* g_umtrace = nullptr;
+struct V4 { float x, y, z, w; };
+typedef void (__attribute__((thiscall)) *UnitMove_t)(void*);
+typedef float (__attribute__((thiscall)) *DesiredPitch_t)(void*, V4);
+static UnitMove_t g_unitmove_orig = nullptr;
+static DesiredPitch_t g_dpitch_orig = nullptr;
+static void __attribute__((thiscall)) unitmove_hook(void* self)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    bool on = now >= g_rd_lo && now <= g_rd_hi;
+    char* u = static_cast<char*>(self);
+    unsigned b[6];
+    if (on) memcpy(b, u + 0xe0, 24);
+    g_unitmove_orig(self);
+    if (now > g_rd_hi) { fflush(g_umtrace); return; }
+    if (!on) return;
+    unsigned a[6];
+    memcpy(a, u + 0xe0, 24);
+    fprintf(g_umtrace, "UM %08x %d", now, (int)*reinterpret_cast<short*>(u + 0x2e));
+    for (int k = 0; k < 6; ++k) fprintf(g_umtrace, " %08x", b[k]);
+    for (int k = 0; k < 6; ++k) fprintf(g_umtrace, " %08x", a[k]);
+    fputc('\n', g_umtrace);
+}
+static float __attribute__((thiscall)) dpitch_hook(void* self, V4 target)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    uintptr_t ra = reinterpret_cast<uintptr_t>(__builtin_return_address(0));
+    float r = g_dpitch_orig(self, target);
+    volatile float rf = r;
+    if (now >= g_rd_lo && now <= g_rd_hi && ra >= 0x004fb280 && ra < 0x004fb3cd) {   // CUnit::Unknown4fb280 only
+        unsigned t[3], ru;
+        memcpy(t, &target, 12);
+        float rr = rf;
+        memcpy(&ru, &rr, 4);
+        // the raw inputs: attached thing's position, mUnknown98, mode angles (+0x7c, +0x80), round speed, gravity,
+        // flags (+0x2c, +0x3c, +0x50, +0x6c)
+        char* w = static_cast<char*>(self);
+        char* at = *reinterpret_cast<char**>(w + 8);
+        char* mode = *reinterpret_cast<char**>(w + 0xa0);
+        char* round = mode ? *reinterpret_cast<char**>(mode + 0x18) : nullptr;
+        unsigned in[10] = {};
+        if (at) memcpy(&in[0], at + 0x1c, 12);
+        memcpy(&in[3], w + 0x98, 4);
+        if (mode) { memcpy(&in[4], mode + 0x7c, 4); memcpy(&in[5], mode + 0x80, 4); }
+        if (round) { memcpy(&in[6], round + 0x2c, 4); memcpy(&in[7], round + 0x3c, 4); memcpy(&in[8], round + 0x50, 4); memcpy(&in[9], round + 0x6c, 4); }
+        fprintf(g_umtrace, "CD %08x %08x %08x %08x %08x", now, t[0], t[1], t[2], ru);
+        for (int k = 0; k < 10; ++k) fprintf(g_umtrace, " %08x", in[k]);
+        fputc('\n', g_umtrace);
+    }
+    return r;
+}
+
+// BEA_U77TRACE=<file>: CUnit::Unknown77 (0x4fa4b0, thiscall: cur*, target*, rate*, out&) between BEA_RDTRACE_MIN and
+// BEA_RDTRACE_MAX seconds: the event time, the thing number, cur, target and rate in, cur out (Euler angles):
+// `U7 <time> <number> <12 floats> vt<vtable>` (float bits), as a traced onslaught-ce build does (without the vtable).
+static FILE* g_u77trace = nullptr;
+typedef void (__attribute__((thiscall)) *U77_t)(void*, float*, float*, float*, float*);
+static U77_t g_u77_orig = nullptr;
+static void __attribute__((thiscall)) u77_hook(void* self, float* cur, float* target, float* rate, float* out)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    unsigned u[12];
+    memcpy(&u[0], cur, 12); memcpy(&u[3], target, 12); memcpy(&u[6], rate, 12);
+    g_u77_orig(self, cur, target, rate, out);
+    if (now > g_rd_hi) { fflush(g_u77trace); return; }
+    if (now < g_rd_lo) return;
+    memcpy(&u[9], cur, 12);
+    fprintf(g_u77trace, "U7 %08x %d", now, (int)*reinterpret_cast<short*>(static_cast<char*>(self) + 0x2e));
+    for (int k = 0; k < 12; ++k) fprintf(g_u77trace, " %08x", u[k]);
+    fprintf(g_u77trace, " vt%p\n", *reinterpret_cast<void**>(self));
+}
+
+// BEA_WLTRACE=<file>: CWorld::FindFirstThingToHitLine (0x50b030, thiscall: CLine by value (52 bytes), ignore, out,
+// firstOnly, mesh, level, ignoreTypes, mapFlag, allowedTypes) called from CBattleEngine::Move's step-up test
+// (returns to 0x409553), between BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds: the event time, the line's start and
+// end, the result, out's hit type and distance and the hit thing's number:
+// `WL <time> <6 floats> <result> <type> <dist> <number>`, as a traced onslaught-ce build does.
+static FILE* g_wltrace = nullptr;
+struct Line52 { unsigned w[13]; };
+typedef int (__attribute__((thiscall)) *FirstHit_t)(void*, Line52, void*, char*, int, int, int, unsigned, int, int);
+static FirstHit_t g_firsthit_orig = nullptr;
+static int __attribute__((thiscall)) firsthit_hook(void* self, Line52 line, void* ignore, char* out, int a, int b, int c,
+                                                   unsigned d, int e, int f)
+{
+    uintptr_t ra = reinterpret_cast<uintptr_t>(__builtin_return_address(0));
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    int r = g_firsthit_orig(self, line, ignore, out, a, b, c, d, e, f);
+    if (now > g_rd_hi) { fflush(g_wltrace); return r; }
+    if (ra != 0x00409553 || now < g_rd_lo) return r;
+    char* hit = *reinterpret_cast<char**>(out);
+    fprintf(g_wltrace, "WL %08x %08x %08x %08x %08x %08x %08x %d %d %08x %d\n", now, line.w[5], line.w[6], line.w[7],
+            line.w[9], line.w[10], line.w[11], r, *reinterpret_cast<int*>(out + 8), *reinterpret_cast<unsigned*>(out + 12),
+            (r == 3 && hit) ? (int)*reinterpret_cast<short*>(hit + 0x2e) : -1);
+    return r;
+}
+
+// BEA_SPTRACE=<file>: CMeshCollisionVolume::CollideWithSphere (0x4ac6e0, thiscall: a, move, sphere, report) between
+// BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds: the event time, the result, move in (mMove, mPos), the sphere's radius
+// (+0x14), move out (mMove, mPos, mStopped), the report's contact count, mContactPos, mDistance, mStuck and normals 0
+// and 1: `SP <time> <hit> <25 words>`, as a traced onslaught-ce build does.
+static FILE* g_sptrace = nullptr;
+typedef int (__attribute__((thiscall)) *MeshSphere_t)(void*, void*, char*, char*, char*);
+static MeshSphere_t g_meshsphere_orig = nullptr;
+static int __attribute__((thiscall)) meshsphere_hook(void* self, void* a, char* move, char* sphere, char* report)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    unsigned u[25] = {};
+    memcpy(&u[0], move, 12); memcpy(&u[3], move + 16, 12); memcpy(&u[6], sphere + 0x14, 4);
+    int hit = g_meshsphere_orig(self, a, move, sphere, report);
+    if (now > g_rd_hi) { fflush(g_sptrace); return hit; }
+    if (now < g_rd_lo) return hit;
+    memcpy(&u[7], move, 12); memcpy(&u[10], move + 16, 12); memcpy(&u[13], move + 32, 4);
+    memcpy(&u[14], report + 128, 4); memcpy(&u[15], report + 132, 12); memcpy(&u[18], report + 196, 4);
+    memcpy(&u[19], report + 200, 4); memcpy(&u[20], report + 8, 12);
+    if (hit) memcpy(&u[23], report + 24, 8);   // normal 1's X and Y (Z dropped for width)
+    fprintf(g_sptrace, "SP %08x %d", now, hit);
+    for (int k = 0; k < 25; ++k) fprintf(g_sptrace, " %08x", u[k]);
+    fputc('\n', g_sptrace);
+    return hit;
+}
+
+// BEA_DOTRACE=<file>: CBattleEngine::DeclareOnObject (0x40c720) and DeclareOnGround (0x40c750) between
+// BEA_RDTRACE_MIN and BEA_RDTRACE_MAX seconds log the event time, which (O/G) and the return address:
+// `DO <time> <O|G> <caller>` - original only, to find which code declares the contact.
+static FILE* g_dotrace = nullptr;
+typedef void (__attribute__((thiscall)) *DeclObj_t)(void*, void*);
+typedef void (__attribute__((thiscall)) *DeclGnd_t)(void*);
+static DeclObj_t g_declobj_orig = nullptr;
+static DeclGnd_t g_declgnd_orig = nullptr;
+static void do_log(char which, void* ra)
+{
+    unsigned now;
+    memcpy(&now, reinterpret_cast<const void*>(0x00672fd0), 4);
+    if (now > g_rd_hi) { fflush(g_dotrace); return; }
+    if (now < g_rd_lo) return;
+    fprintf(g_dotrace, "DO %08x %c %p\n", now, which, ra);
+}
+static void __attribute__((thiscall)) declobj_hook(void* self, void* obj)
+{
+    do_log('O', __builtin_return_address(0));
+    g_declobj_orig(self, obj);
+}
+static void __attribute__((thiscall)) declgnd_hook(void* self)
+{
+    do_log('G', __builtin_return_address(0));
+    g_declgnd_orig(self);
+}
+
+static void install_evtrace()
+{
+    {
+        char dp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_DOTRACE", dp, sizeof dp) && (g_dotrace = fopen(dp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS a = MH_CreateHook(reinterpret_cast<void*>(0x0040c720), reinterpret_cast<void*>(&declobj_hook), reinterpret_cast<void**>(&g_declobj_orig));
+            MH_STATUS b = MH_CreateHook(reinterpret_cast<void*>(0x0040c750), reinterpret_cast<void*>(&declgnd_hook), reinterpret_cast<void**>(&g_declgnd_orig));
+            if (a == MH_OK) a = MH_EnableHook(reinterpret_cast<void*>(0x0040c720));
+            if (b == MH_OK) b = MH_EnableHook(reinterpret_cast<void*>(0x0040c750));
+            bea_log("dotrace: writing %s: %s %s", dp, MH_StatusToString(a), MH_StatusToString(b));
+        }
+    }
+    {
+        char sp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_SPTRACE", sp, sizeof sp) && (g_sptrace = fopen(sp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x004ac6e0), reinterpret_cast<void*>(&meshsphere_hook),
+                                         reinterpret_cast<void**>(&g_meshsphere_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x004ac6e0));
+            bea_log("sptrace: writing %s: %s", sp, MH_StatusToString(st));
+        }
+    }
+    {
+        char wp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_WLTRACE", wp, sizeof wp) && (g_wltrace = fopen(wp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x0050b030), reinterpret_cast<void*>(&firsthit_hook),
+                                         reinterpret_cast<void**>(&g_firsthit_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x0050b030));
+            bea_log("wltrace: writing %s: %s", wp, MH_StatusToString(st));
+        }
+    }
+    {
+        char tp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_U77TRACE", tp, sizeof tp) && (g_u77trace = fopen(tp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x004fa4b0), reinterpret_cast<void*>(&u77_hook),
+                                         reinterpret_cast<void**>(&g_u77_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x004fa4b0));
+            bea_log("u77trace: writing %s: %s", tp, MH_StatusToString(st));
+        }
+    }
+    {
+        char up[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_UMTRACE", up, sizeof up) && (g_umtrace = fopen(up, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS a = MH_CreateHook(reinterpret_cast<void*>(0x004fa8d0), reinterpret_cast<void*>(&unitmove_hook),
+                                        reinterpret_cast<void**>(&g_unitmove_orig));
+            MH_STATUS b = MH_CreateHook(reinterpret_cast<void*>(0x005094b0), reinterpret_cast<void*>(&dpitch_hook),
+                                        reinterpret_cast<void**>(&g_dpitch_orig));
+            if (a == MH_OK) a = MH_EnableHook(reinterpret_cast<void*>(0x004fa8d0));
+            if (b == MH_OK) b = MH_EnableHook(reinterpret_cast<void*>(0x005094b0));
+            bea_log("umtrace: writing %s: %s %s", up, MH_StatusToString(a), MH_StatusToString(b));
+        }
+    }
+    {
+        char gp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_GPTRACE", gp, sizeof gp) && (g_gptrace = fopen(gp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x00496ac0), reinterpret_cast<void*>(&gvpart_hook),
+                                         reinterpret_cast<void**>(&g_gvpart_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x00496ac0));
+            bea_log("gptrace: writing %s: %s", gp, MH_StatusToString(st));
+        }
+    }
+    {
+        char tp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_ATTRACE", tp, sizeof tp) && (g_attrace = fopen(tp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x004b5330), reinterpret_cast<void*>(&animxform_hook),
+                                         reinterpret_cast<void**>(&g_animxform_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x004b5330));
+            bea_log("attrace: writing %s: %s", tp, MH_StatusToString(st));
+        }
+    }
+    {
+        char tp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_PTTRACE", tp, sizeof tp) && (g_pttrace = fopen(tp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x004ad600), reinterpret_cast<void*>(&cachepart_hook),
+                                         reinterpret_cast<void**>(&g_cachepart_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x004ad600));
+            bea_log("pttrace: writing %s: %s", tp, MH_StatusToString(st));
+        }
+    }
+    {
+        char ep[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_EMTRACE", ep, sizeof ep) && (g_emtrace = fopen(ep, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x004dd160), reinterpret_cast<void*>(&rtemitter_hook),
+                                         reinterpret_cast<void**>(&g_rtemitter_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x004dd160));
+            bea_log("emtrace: writing %s: %s", ep, MH_StatusToString(st));
+        }
+    }
+    {
+        char mp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_MLTRACE", mp, sizeof mp) && (g_mltrace = fopen(mp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x004ad830), reinterpret_cast<void*>(&meshline_hook),
+                                         reinterpret_cast<void**>(&g_meshline_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x004ad830));
+            bea_log("mltrace: writing %s: %s", mp, MH_StatusToString(st));
+        }
+    }
+    {
+        char pp[MAX_PATH];
+        if (GetEnvironmentVariableA("BEA_PITCHTRACE", pp, sizeof pp) && (g_pitchtrace = fopen(pp, "w"))) {
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x004136e0), reinterpret_cast<void*>(&wpitch_hook),
+                                         reinterpret_cast<void**>(&g_wpitch_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x004136e0));
+            bea_log("pitchtrace: writing %s: %s", pp, MH_StatusToString(st));
+        }
+    }
+    {
+        char ap[MAX_PATH];
+        unsigned char* s1 = reinterpret_cast<unsigned char*>(0x0040b3e3);
+        unsigned char* s2 = reinterpret_cast<unsigned char*>(0x0040b5b6);
+        auto is_asin_call = [](unsigned char* s) {
+            return s[0] == 0xe8 && reinterpret_cast<uintptr_t>(s + 5) + *reinterpret_cast<int32_t*>(s + 1) == 0x0055dcb0;
+        };
+        if (GetEnvironmentVariableA("BEA_AIMTRACE", ap, sizeof ap) && is_asin_call(s1) && is_asin_call(s2) &&
+            (g_aimtrace = fopen(ap, "w"))) {
+            DWORD old;
+            VirtualProtect(s1, 0x200, PAGE_EXECUTE_READWRITE, &old);
+            *reinterpret_cast<int32_t*>(s1 + 1) = reinterpret_cast<intptr_t>(&bea_aim_stub1) - reinterpret_cast<intptr_t>(s1 + 5);
+            s1[0] = 0xe9;
+            *reinterpret_cast<int32_t*>(s2 + 1) = reinterpret_cast<intptr_t>(&bea_aim_stub2) - reinterpret_cast<intptr_t>(s2 + 5);
+            s2[0] = 0xe9;
+            VirtualProtect(s1, 0x200, old, &old);
+            FlushInstructionCache(GetCurrentProcess(), s1, 0x200);
+            bea_log("aimtrace: writing %s", ap);
+        }
+    }
+    {
+        char rp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_RDTRACE", rp, sizeof rp) && (g_rdtrace = fopen(rp, "w"))) {
+            float f;
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MIN", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_lo, &f, 4); }
+            if (GetEnvironmentVariableA("BEA_RDTRACE_MAX", m, sizeof m)) { f = (float)atof(m); memcpy(&g_rd_hi, &f, 4); }
+            MH_STATUS a = MH_CreateHook(reinterpret_cast<void*>(0x004d8410), reinterpret_cast<void*>(&rdinit_hook), reinterpret_cast<void**>(&g_rdinit_orig));
+            MH_STATUS b = MH_CreateHook(reinterpret_cast<void*>(0x004d8e40), reinterpret_cast<void*>(&rdmove_hook), reinterpret_cast<void**>(&g_rdmove_orig));
+            if (a == MH_OK) a = MH_EnableHook(reinterpret_cast<void*>(0x004d8410));
+            if (b == MH_OK) b = MH_EnableHook(reinterpret_cast<void*>(0x004d8e40));
+            bea_log("rdtrace: writing %s: %s %s", rp, MH_StatusToString(a), MH_StatusToString(b));
+        }
+    }
+    {
+        char cp[MAX_PATH], m[32];
+        static const unsigned char want[5] = { 0xff, 0x52, 0x14, 0x3b, 0xc3 };
+        unsigned char* site = reinterpret_cast<unsigned char*>(0x004267cb);
+        if (GetEnvironmentVariableA("BEA_COLTRACE", cp, sizeof cp) && !memcmp(site, want, 5) && (g_coltrace = fopen(cp, "w"))) {
+            if (GetEnvironmentVariableA("BEA_EVTRACE_MAX", m, sizeof m)) { float f = (float)atof(m); memcpy(&g_evtrace_max, &f, 4); }
+            DWORD old;
+            VirtualProtect(site, 5, PAGE_EXECUTE_READWRITE, &old);
+            site[0] = 0xe9;
+            *reinterpret_cast<int32_t*>(site + 1) = reinterpret_cast<intptr_t>(&bea_col_stub) - reinterpret_cast<intptr_t>(site + 5);
+            VirtualProtect(site, 5, old, &old);
+            FlushInstructionCache(GetCurrentProcess(), site, 5);
+            bea_log("coltrace: writing %s", cp);
+        }
+    }
+    {
+        char hp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_HITTRACE", hp, sizeof hp) && (g_hittrace = fopen(hp, "w"))) {
+            if (GetEnvironmentVariableA("BEA_EVTRACE_MAX", m, sizeof m)) { float f = (float)atof(m); memcpy(&g_evtrace_max, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x004fcc30), reinterpret_cast<void*>(&unithit_hook),
+                                         reinterpret_cast<void**>(&g_unithit_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x004fcc30));
+            bea_log("hittrace: writing %s: %s", hp, MH_StatusToString(st));
+        }
+    }
+    {
+        char gp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_GVTRACE", gp, sizeof gp) && (g_gvtrace = fopen(gp, "w"))) {
+            if (GetEnvironmentVariableA("BEA_EVTRACE_MAX", m, sizeof m)) { float f = (float)atof(m); memcpy(&g_evtrace_max, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x0047d1c0), reinterpret_cast<void*>(&gvmove_hook),
+                                         reinterpret_cast<void**>(&g_gvmove_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x0047d1c0));
+            bea_log("gvtrace: writing %s: %s", gp, MH_StatusToString(st));
+        }
+    }
+    {
+        char cp[MAX_PATH], m[32];
+        if (GetEnvironmentVariableA("BEA_CCTRACE", cp, sizeof cp) && (g_cctrace = fopen(cp, "w"))) {
+            if (GetEnvironmentVariableA("BEA_EVTRACE_MAX", m, sizeof m)) { float f = (float)atof(m); memcpy(&g_evtrace_max, &f, 4); }
+            MH_STATUS st = MH_CreateHook(reinterpret_cast<void*>(0x00480ed0), reinterpret_cast<void*>(&schedcc_hook),
+                                         reinterpret_cast<void**>(&g_schedcc_orig));
+            if (st == MH_OK) st = MH_EnableHook(reinterpret_cast<void*>(0x00480ed0));
+            bea_log("cctrace: writing %s: %s", cp, MH_StatusToString(st));
+        }
+    }
+    char p[MAX_PATH], m[32];
+    if (!GetEnvironmentVariableA("BEA_EVTRACE", p, sizeof p)) return;
+    if (GetEnvironmentVariableA("BEA_EVTRACE_MAX", m, sizeof m)) { float f = (float)atof(m); memcpy(&g_evtrace_max, &f, 4); }
+    static const unsigned char want1[5] = { 0x8b, 0x11, 0x50, 0xff, 0x12 }, want2[5] = { 0x8b, 0x01, 0x52, 0xff, 0x10 };
+    unsigned char* s1 = reinterpret_cast<unsigned char*>(0x0044b687);
+    unsigned char* s2 = reinterpret_cast<unsigned char*>(0x0044b6ef);
+    if (memcmp(s1, want1, 5) || memcmp(s2, want2, 5)) { bea_log("evtrace: Flush is not the retail code, off"); return; }
+    if (!(g_evtrace = fopen(p, "w"))) { bea_log("evtrace: cannot write %s", p); return; }
+    DWORD old;
+    VirtualProtect(s1, 0x70, PAGE_EXECUTE_READWRITE, &old);
+    s1[0] = 0xe9; *reinterpret_cast<int32_t*>(s1 + 1) = reinterpret_cast<intptr_t>(&bea_evtrace_stub1) - reinterpret_cast<intptr_t>(s1 + 5);
+    s2[0] = 0xe9; *reinterpret_cast<int32_t*>(s2 + 1) = reinterpret_cast<intptr_t>(&bea_evtrace_stub2) - reinterpret_cast<intptr_t>(s2 + 5);
+    VirtualProtect(s1, 0x70, old, &old);
+    FlushInstructionCache(GetCurrentProcess(), s1, 0x70);
+    bea_log("evtrace: writing %s", p);
+}
+
 void bea_install_harness()
 {
     if (!strstr(GetCommandLineA(), "-forcewindowed")) {
@@ -2431,6 +3517,8 @@ void bea_install_harness()
             if (!strcmp(sc, "fit")) { g_rec_fit = true; g_rec_scale = 2; }
             else if (atoi(sc) > 1 && atoi(sc) <= 8) g_rec_scale = atoi(sc);
         }
+    } else if (GetEnvironmentVariableA("BEA_TAPE_IN", rec, sizeof rec)) {
+        load_tape_in(rec);
     } else if (GetEnvironmentVariableA("BEA_REPLAY", rec, sizeof rec)) {
         load_replay(rec);
         g_replaying = true;
@@ -2449,7 +3537,7 @@ void bea_install_harness()
     }
     MH_CreateHookApi(L"user32", "CreateWindowExA", reinterpret_cast<void*>(&CreateWindowExA_hook),
                      reinterpret_cast<void**>(&g_CreateWindowExA_orig));
-    if (g_recording || g_replaying)
+    if (g_recording || g_replaying || g_tapein)
         MH_CreateHookApi(L"dinput8", "DirectInput8Create", reinterpret_cast<void*>(&DirectInput8Create_hook),
                          reinterpret_cast<void**>(&g_DirectInput8Create_orig));
     MH_CreateHookApi(L"user32", "MessageBoxA", reinterpret_cast<void*>(&MessageBoxA_hook),
@@ -2468,6 +3556,7 @@ void bea_install_harness()
         HKL us = LoadKeyboardLayoutA("00000409", KLF_ACTIVATE | KLF_SETFORPROCESS);
         bea_log("harness: keyboard layout %s for this process (test run)", us ? "US English" : "unchanged (US English not available)");
     }
+    install_evtrace();
     install_soundclock();
     install_videoclock();
     install_protect();
