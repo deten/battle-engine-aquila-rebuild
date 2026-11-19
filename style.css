@@ -99,6 +99,8 @@ code {
   background: linear-gradient(90deg, rgba(91, 227, 122, 0.12), rgba(4, 9, 25, 0.6) 40%); }
 .status.bad { --state: #ff4d5e; --state-glow: rgba(255, 77, 94, 0.45);
   background: linear-gradient(90deg, rgba(255, 77, 94, 0.12), rgba(4, 9, 25, 0.6) 40%); }
+.status.ro { --state: #6fcfff; --state-glow: rgba(111, 207, 255, 0.45);
+  background: linear-gradient(90deg, rgba(111, 207, 255, 0.12), rgba(4, 9, 25, 0.6) 40%); }
 .status .inner {
   max-width: 1080px;
   margin: 0 auto;
