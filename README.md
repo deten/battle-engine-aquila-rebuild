@@ -2,6 +2,8 @@
 
 > **Disclaimer:** this is an unofficial fan project. It is not affiliated with or endorsed by Lost Toys, the game's publishers or the current rights holders. *Battle Engine Aquila* and related names are trademarks of their respective owners and are used here only to say which game this works with.
 
+> **Read only (since 2026-11-19):** I've stopped developing this rebuild, and this repository is kept as a record. My work on the game now goes into [Onslaught CE](https://github.com/dlprentice/onslaught-ce), a modern port built from the released source: I replay my recordings there and send fixes wherever it behaves differently from the original. Issues and pull requests here won't be acted on. A port of this rebuild to Rust may come later; nothing is planned yet.
+
 > **Pre-source snapshot:** everything I did before I knew the game's source code had been released is preserved, unchanged, at the tag **[pre-source-2026-11-05](https://github.com/deten/battle-engine-aquila-rebuild/tree/pre-source-2026-11-05)**. Anything added to this repository after that may use the released source or onslaught-decomp as a reference, and says so.
 
 A rebuild of the PC game *Battle Engine Aquila* (Lost Toys, 2003) that runs inside the original game. Each of the game's functions was rewritten as C++ and swapped in one at a time, and every swap was tested against the original game until it behaved the same.
@@ -14,13 +16,18 @@ All of this work was done from the game's machine code alone, with Ghidra and a 
 
 If you want the real source, see Stuart Gillam's GPL release ([stuart73/Onslaught](https://github.com/stuart73/Onslaught)) and the byte-matching decompilation built from it ([dlprentice/onslaught-decomp](https://github.com/dlprentice/onslaught-decomp)). What this repository adds is mostly the **testing**: a way to make the original game repeat itself exactly, recorded playthroughs to replay, and the bugs and quirks that testing turned up.
 
-## Status
+## Where it stopped
 
 - 4,464 of the 4,473 functions Ghidra found in the game's code are replaced (99.8%), and the game plays normally with all of them on.
 - Ghidra missed another 942 small functions (about 96 KB), which I only learned later by comparing with onslaught-decomp's function list. Nothing calls them directly, so Ghidra never saw them as functions: 785 are start-up and shut-down code that sets up and cleans up the game's global objects, 110 are mission-script commands (`Damage`, `AddScore`, `SetVelocity`...) that missions reach through a table, 25 are developer console commands, and the rest are callbacks and small helpers. They still run as the original game's code. Counting them, about 82% of the game's functions and 90% of its code are replaced.
 - 102 level tests (recorded playthroughs and AI-only levels) and 47 menu tours all match the original game.
 - With the test switches below, the original game repeats itself exactly with sound on, with movies on, and at 30, 60 and 144 fps, and the rebuild matches it there too (one screenshot in one multiplayer tour with movies on is the only known exception).
 - About 90% of the rebuilt functions behaved like the original on the first try; about 6% needed fixing, mostly how values are passed between functions and the order floating-point numbers are added in.
+- Fullscreen works on Windows 11 at every resolution from 640x480 to 2048x1536, at 225 fps (the original reaches 300). Still open when work stopped: a few hundred rebuilt functions that may compare invalid numbers (NaN) differently from the original.
+
+## Onslaught CE
+
+The testing is the part that lives on. `tools/ce_export.py` turns each recording into an Onslaught CE tape and writes the original game's state every 50 frames as an answer key (`BEA_TAPE_OUT`, `BEA_PROBES` below), so a CE build can be checked against the original one recording at a time. With my fixes, 78 of my 86 replayable recordings play out in Onslaught CE exactly as in the original game; the other 8 first part at one bug in the original (a value it reads without setting), which CE now copies. The fixes themselves are pull requests to [Onslaught CE](https://github.com/dlprentice/onslaught-ce), and the traces behind them are in `evidence/`.
 
 ## What is in here
 
